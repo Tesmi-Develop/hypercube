@@ -9,16 +9,22 @@ namespace Hypercube.Core.Resources;
 [UsedImplicitly]
 public sealed class ResourceManager : IResourceManager, IDisposable
 {
-    public readonly IFileSystem FileSystem;
-    public readonly DependenciesContainer? Container;
-    
+    private readonly IDependenciesContainer? _container;
     private readonly Dictionary<Type, IResourceLoader> _loaders = [];
     private readonly Dictionary<ResourcePath, Resource> _cache = [];
 
-    public ResourceManager(IFileSystem? fileSystem = null, DependenciesContainer? container = null)
+    public IFileSystem FileSystem { get; }
+
+    public ResourceManager(IDependenciesContainer container)
     {
+        _container = container;
+        FileSystem = new PhysicalFileSystem();
+    }
+    
+    public ResourceManager(IFileSystem? fileSystem = null, IDependenciesContainer? container = null)
+    {
+        _container = container;
         FileSystem = fileSystem ?? new PhysicalFileSystem();
-        Container = container;
     }
 
     /// <inheritdoc/>
@@ -52,10 +58,15 @@ public sealed class ResourceManager : IResourceManager, IDisposable
         
         _loaders.Add(typeof(T), loader);
     }
+    
+    public T GetLoader<T>() where T : IResourceLoader
+    {
+        return (T) _loaders[typeof(T)];
+    }
 
     public void AddAllLoaders()
     {
-        foreach (var loader in GetAllLoaders(Container))
+        foreach (var loader in GetAllLoaders(_container))
         {
             if (!_loaders.TryAdd(loader.ResourceType, loader))
                 throw new Exception();
@@ -75,14 +86,6 @@ public sealed class ResourceManager : IResourceManager, IDisposable
         _loaders.Remove(typeof(T));
     }
 
-    public T Get<T>(ResourcePath path) where T : Resource
-    {
-        if (_cache.TryGetValue(path, out var resource))
-            return resource as T ?? throw new Exception();
-
-        return Load<T>(path);
-    }
-
     public IEnumerable<T> GetAllCached<T>() where T : Resource
     {
         foreach (var resource in _cache.Values)
@@ -99,18 +102,28 @@ public sealed class ResourceManager : IResourceManager, IDisposable
 
     public T Load<T>(ResourcePath path) where T : Resource
     {
-        return (T) Load(path, typeof(T));
+        return (T) Load(path, typeof(T), []);
+    }
+
+    public T Load<T>(ResourcePath path, ResourceLoadArg[] args) where T : Resource
+    {
+        return (T) Load(path, typeof(T), args);
     }
 
     public Resource Load(ResourcePath path, Type type)
     {
-        if (!_loaders.TryGetValue(type, out var loader))
-            throw new Exception();
-
+        return Load(path, type, []);
+    }
+    
+    public Resource Load(ResourcePath path, Type type, ResourceLoadArg[] args)
+    {
         if (_cache.TryGetValue(path, out var cache))
             return cache;
+     
+        if (!_loaders.TryGetValue(type, out var loader))
+            throw new Exception();
         
-        var resource = loader.Load(path, FileSystem);
+        var resource = loader.Load(path, FileSystem, args);
         _cache[path] = resource;
         
         return resource;
@@ -124,7 +137,7 @@ public sealed class ResourceManager : IResourceManager, IDisposable
         foreach (var (_, loader) in _loaders)
         {
             if (loader.Extensions.Contains(path.Extension))
-                return loader.Load(path, FileSystem);
+                return loader.Load(path, FileSystem, []);
         }
 
         throw new Exception();
@@ -156,7 +169,7 @@ public sealed class ResourceManager : IResourceManager, IDisposable
         UnloadAll();
     }
 
-    private static List<IResourceLoader> GetAllLoaders(DependenciesContainer? container)
+    private static List<IResourceLoader> GetAllLoaders(IDependenciesContainer? container)
     {
         var result = new List<IResourceLoader>();
         var types = ReflectionHelper.GetAllInstantiableSubclassOf(typeof(IResourceLoader));

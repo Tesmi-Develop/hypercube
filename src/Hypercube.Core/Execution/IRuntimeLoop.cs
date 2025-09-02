@@ -1,4 +1,4 @@
-﻿using Hypercube.Core.Utilities.Events;
+﻿using Hypercube.Utilities.Collections;
 
 namespace Hypercube.Core.Execution;
 

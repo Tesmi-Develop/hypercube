@@ -1,4 +1,4 @@
-﻿using Hypercube.Core.Utilities.Events;
+﻿using Hypercube.Utilities.Collections;
 using Hypercube.Utilities.Debugging.Logger;
 using Hypercube.Utilities.Dependencies;
 

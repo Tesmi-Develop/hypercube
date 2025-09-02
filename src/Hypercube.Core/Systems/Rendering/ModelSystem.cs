@@ -34,7 +34,7 @@ public sealed class ModelSystem : PatchEntitySystem
 
     private void OnAdded(ref Entity entity, ref ModelComponent component, ref AddedEvent args)
     {
-        component.Model = _resource.Get<Model>(component.Path);
+        component.Model = _resource.Load<Model>(component.Path);
     }
     
     public override void Draw(IRenderContext renderer)

@@ -5,7 +5,6 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Transform;
 
-[RegisterComponent]
 public sealed class TransformComponent : Component
 {
     public Entity? Parent;

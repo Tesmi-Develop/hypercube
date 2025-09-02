@@ -107,7 +107,7 @@ public class Renderer : IRenderer, IPostInject
 
     private void OnThreadStart()
     {
-        if (_settings.Thread is not { } thread)
+        if (_settings.Thread is null)
             throw new InvalidOperationException();
         
         _windowManager.Init(_settings.WindowingApi);

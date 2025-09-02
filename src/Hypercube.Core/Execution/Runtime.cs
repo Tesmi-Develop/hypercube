@@ -102,7 +102,7 @@ public sealed class Runtime
 
     private void InitPrimaryDependencies()
     {
-        _dependencies.Register<ILogger>(_logger);
+        _dependencies.RegisterSingleton<ILogger>(_logger);
     }
     
     private void InitDependencies()
@@ -113,7 +113,7 @@ public sealed class Runtime
         _dependencies.Register<IEntitySystemManager, EntitySystemManager>();
 
         // Resources
-        _dependencies.Register<IResourceManager>(new ResourceManager(container: _dependencies));
+        _dependencies.RegisterSingleton<IResourceManager>(new ResourceManager(_dependencies));
         
         // Windowing
         _dependencies.Register<IWindowManager, WindowManager>();
@@ -128,7 +128,7 @@ public sealed class Runtime
         // Audio
         _dependencies.Register<IAudioManager, AudioManager>();
 
-        _dependencies.InstantiateAll();
+        _dependencies.ResolveAll();
         _dependencies.Inject(this);
     }
     
@@ -136,7 +136,7 @@ public sealed class Runtime
     {
         // Input
         _dependencies.Register<IInputHandler, InputHandler>();
-        _dependencies.InstantiateAll();
+        _dependencies.ResolveAll();
     }
 
     private void EntryPointsLoad()

@@ -33,7 +33,7 @@ public sealed class SpriteSystem : PatchEntitySystem
 
     private void OnAdded(ref Entity entity, ref SpriteComponent component, ref AddedEvent args)
     {
-        component.Texture = _resource.Get<Texture>(component.Path);
+        component.Texture = _resource.Load<Texture>(component.Path);
         
         if (component.Texture.Gpu is null)
             component.Texture.GpuBind(_render.Api);

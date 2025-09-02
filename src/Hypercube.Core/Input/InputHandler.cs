@@ -60,7 +60,7 @@ public sealed class InputHandler : IInputHandler, IPostInject
 
     public bool IsKeyReleased(nint window, Key key)
     {
-        return IsKeyState(window, key, KeyState.Pressed);
+        return IsKeyState(window, key, KeyState.Released);
     }
 
     public bool IsKeyState(Key key, KeyState state)
@@ -128,7 +128,7 @@ public sealed class InputHandler : IInputHandler, IPostInject
         
     }
     
-    private readonly struct Keys
+    private class Keys
     {
         public readonly List<Key> Released = [];
         public readonly List<Key> Pressed = [];
@@ -142,9 +142,5 @@ public sealed class InputHandler : IInputHandler, IPostInject
                 KeyState.Held => Held,
                 _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
             };
-
-        public Keys()
-        {
-        }
     }
 }

@@ -9,6 +9,9 @@ public partial class OpenAlAudioApi
     {
         get
         {
+            if (!Ready)
+                return string.Empty;
+                
             var builder = new StringBuilder();
             builder.Append("Vendor: ");
             builder.AppendLine(_al.GetStateProperty(StateString.Vendor));

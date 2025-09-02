@@ -4,7 +4,6 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Physics;
 
-[RegisterComponent]
 public sealed class PhysicsComponent : Component
 {
     public Vector2 LinearVelocity;

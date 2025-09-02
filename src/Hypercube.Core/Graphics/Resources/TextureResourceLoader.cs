@@ -21,8 +21,19 @@ public sealed class TextureResourceLoader : ResourceLoader<Texture>
 
     public override Texture Load(ResourcePath path, IFileSystem fileSystem)
     {
-        using var stream = fileSystem.OpenRead(path);
-        var result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-        return new Texture(new Vector2i(result.Width, result.Height), result.Data, (int) ColorComponents.RedGreenBlueAlpha, Rect2.UV);
+        var tempFlipGlobal = StbImage.stbi__vertically_flip_on_load_global;
+
+        try
+        {
+            using var stream = fileSystem.OpenRead(path);
+            // TODO: flip setting by ResourceLoadArg[]
+            
+            var result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+            return new Texture(new Vector2i(result.Width, result.Height), result.Data, (int) ColorComponents.RedGreenBlueAlpha, Rect2.UV);
+        }
+        finally
+        {
+            StbImage.stbi__vertically_flip_on_load_global = tempFlipGlobal;   
+        }
     }
 }

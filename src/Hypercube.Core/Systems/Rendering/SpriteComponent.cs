@@ -8,7 +8,6 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Rendering;
 
-[RegisterComponent]
 public sealed class SpriteComponent : Component
 {
     public Texture? Texture;

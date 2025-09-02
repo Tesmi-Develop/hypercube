@@ -5,6 +5,7 @@ using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Core.Windowing;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Matrices;
+using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Graphics.Rendering.Api.Realisations.Headless;
@@ -70,6 +71,14 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     }
 
     public void DeleteTexture(uint handle)
+    {
+    }
+
+    public void SetScissor(bool value)
+    {
+    }
+
+    public void SetScissorRect(Rect2i rect)
     {
     }
 

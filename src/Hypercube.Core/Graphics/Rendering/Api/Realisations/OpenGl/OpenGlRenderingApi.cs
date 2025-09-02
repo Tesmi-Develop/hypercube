@@ -7,6 +7,7 @@ using Hypercube.Core.Graphics.Utilities.Extensions;
 using Hypercube.Core.Graphics.Viewports;
 using Hypercube.Core.Resources;
 using Hypercube.Core.Windowing;
+using Hypercube.Mathematics.Shapes;
 using Hypercube.Utilities.Dependencies;
 using Silk.NET.OpenGL;
 using Shader = Hypercube.Core.Graphics.Resources.Shader;
@@ -97,6 +98,16 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi
         Gl.DeleteTexture(handle);
     }
 
+    public override void SetScissor(bool value)
+    {
+        Gl.SetScissor(value);
+    }
+
+    public override void SetScissorRect(Rect2i rect)
+    {
+        Gl.Scissor(rect.Left, rect.Top, (uint) rect.Width, (uint) rect.Height);
+    }
+
     protected override bool InternalInit(IContextInfo contextInfo)
     {
         Gl = GL.GetApi(contextInfo.GetProcAddress);
@@ -142,8 +153,8 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi
 
     protected override void InternalLoad()
     {
-        PrimitiveShaderProgram = _resource.Get<Shader>("/shaders/base_primitive.shd");
-        TexturingShaderProgram = _resource.Get<Shader>("/shaders/base_texturing.shd");
+        PrimitiveShaderProgram = _resource.Load<Shader>("/shaders/base_primitive.shd");
+        TexturingShaderProgram = _resource.Load<Shader>("/shaders/base_texturing.shd");
     }
 
     protected override void InternalTerminate()
@@ -164,9 +175,9 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi
 
         BreakCurrentBatch();
         UpdateBatchCount();
-
-        Gl.Enable(EnableCap.Blend);
-        Gl.Disable(EnableCap.ScissorTest);
+        
+        Gl.SetBlend(true);
+        Gl.SetScissor(false);
 
         Gl.BlendEquation(BlendEquationModeEXT.FuncAdd);
         Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

@@ -8,6 +8,6 @@ public interface IResourceLoader
     string[] Extensions { get; }
     Type ResourceType { get; }
     
-    public bool CanLoad(ResourcePath path, IFileSystem fileSystem);
-    public Resource Load(ResourcePath path, IFileSystem fileSystem);
+    public bool CanLoad(ResourcePath path, IFileSystem fileSystem, ResourceLoadArg[] args);
+    public Resource Load(ResourcePath path, IFileSystem fileSystem, ResourceLoadArg[] args);
 }

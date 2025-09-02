@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Hypercube.Core.Graphics.Rendering.Batching;
 using Hypercube.Core.Windowing;
 using Hypercube.Mathematics;
@@ -12,11 +13,24 @@ namespace Hypercube.Core.Graphics.Utilities.Extensions;
 [EngineInternal]
 public static class SilkGLExtension
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void SetBlend(this GL gl, bool value)
+    {
+        gl.SetEnableCap(EnableCap.Blend, value);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void SetScissor(this GL gl, bool value)
+    {
+        gl.SetEnableCap(EnableCap.ScissorTest, value);
+    }
+    
     public static void Viewport(this GL gl, IWindow window)
     {
         Viewport(gl, window.Size);
     }
     
+    [PublicAPI]
     public static void Viewport(this GL gl, Vector2i size)
     {
         gl.Viewport(0, 0, (uint) size.X, (uint) size.Y);
@@ -52,6 +66,18 @@ public static class SilkGLExtension
     {
         var pointer = (void*) indices;
         gl.DrawElements(ToPrimitiveType(topology), (uint) count, type, pointer);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SetEnableCap(this GL gl, EnableCap cap, bool value)
+    {
+        if (value)
+        {
+            gl.Enable(cap);
+            return;
+        }
+        
+        gl.Disable(cap);
     }
 
     private static PrimitiveType ToPrimitiveType(PrimitiveTopology primitiveTopology)

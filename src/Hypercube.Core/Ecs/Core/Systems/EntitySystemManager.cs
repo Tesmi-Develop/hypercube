@@ -1,6 +1,7 @@
 ﻿using Hypercube.Core.Ecs.Utilities;
 using Hypercube.Core.Execution;
 using Hypercube.Core.Utilities;
+using Hypercube.Utilities.Collections;
 using Hypercube.Utilities.Dependencies;
 
 namespace Hypercube.Core.Ecs.Core.Systems;
@@ -15,7 +16,7 @@ public sealed class EntitySystemManager : IEntitySystemManager, IPostInject
     public IWorld Main { get; private set; } = default!;
 
     private readonly WorldRegistrar _registrar = new();
-    private readonly IntPool _worldIdPool = new();
+    private readonly NumPool<int> _worldIdPool = new();
 
     private IWorld[] _worlds = [];
 

@@ -10,7 +10,10 @@ namespace Hypercube.Core.Graphics.Resources;
 
 public class FontResourceLoader : ResourceLoader<Font>
 {
+    private const int DefaultSize = 16;
+    
     public override string[] Extensions => ["ttf", "otf"];
+    public override bool SupportLoadArgs => true;
 
     public override bool CanLoad(ResourcePath path, IFileSystem fileSystem)
     {
@@ -19,13 +22,27 @@ public class FontResourceLoader : ResourceLoader<Font>
 
     public override Font Load(ResourcePath path, IFileSystem fileSystem)
     {
-        const int size = 32;
+        return Load(path, DefaultSize, fileSystem);
+    }
+
+    public override Font Load(ResourcePath path, IFileSystem fileSystem, ResourceLoadArg[] args)
+    {
+        var size = DefaultSize;
+        foreach (var arg in args)
+        {
+            if (arg is { Key: "size", Value: int value })
+                size = value;
+        }
         
+        return Load(path, size, fileSystem);
+    }
+
+    private static Font Load(ResourcePath path, int size, IFileSystem fileSystem)
+    {
         var stream = fileSystem.OpenRead(path);
         using var memory = new MemoryStream();
         stream.CopyTo(memory);
         var fontData = memory.ToArray();
-
         
         var fontStream = FontAtlasGenerator.Generate(fontData, out var glyphs, size);
         var result = ImageResult.FromStream(fontStream, ColorComponents.RedGreenBlueAlpha);

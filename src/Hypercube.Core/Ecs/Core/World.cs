@@ -5,7 +5,7 @@ using Hypercube.Core.Ecs.Core.Components;
 using Hypercube.Core.Ecs.Core.Events;
 using Hypercube.Core.Ecs.Core.Query;
 using Hypercube.Core.Ecs.Events;
-using Hypercube.Core.Utilities;
+using Hypercube.Utilities.Collections;
 using Hypercube.Utilities.Dependencies;
 
 namespace Hypercube.Core.Ecs.Core;
@@ -22,7 +22,7 @@ public sealed class World : IWorld
 
     private readonly DependenciesContainer _container;
     private readonly WorldEventBus _eventBus = new();
-    private readonly IntPool _entityPool = new();
+    private readonly NumPool<int> _entityPool = new();
 
     public EntityQueryBuilder EntityQueryBuilder => new(this);
     
@@ -230,13 +230,8 @@ public sealed class World : IWorld
 
         return (IEntitySystem) instance;
     }
-    
-    private T InstantiateSystem<T>() where T : IEntitySystem
-    {
-        return (T) InstantiateSystem(typeof(T));
-    }
 
-    private T InstantiateComponent<T>() where T : IComponent
+    private static T InstantiateComponent<T>() where T : IComponent
     {
         var constructors = typeof(T).GetConstructors();
         if (constructors.Length == 0)

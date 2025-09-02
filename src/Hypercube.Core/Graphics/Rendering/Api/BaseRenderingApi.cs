@@ -6,6 +6,7 @@ using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Core.Windowing;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Matrices;
+using Hypercube.Mathematics.Shapes;
 
 namespace Hypercube.Core.Graphics.Rendering.Api;
 
@@ -112,6 +113,9 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         
         return InternalCreateShaderProgram(shaders);
     }
+
+    public abstract void SetScissor(bool value);
+    public abstract void SetScissorRect(Rect2i rect);
 
     protected void UpdateBatchCount()
     {
