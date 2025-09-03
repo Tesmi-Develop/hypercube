@@ -39,15 +39,17 @@ public class FontResourceLoader : ResourceLoader<Font>
 
     private static Font Load(ResourcePath path, int size, IFileSystem fileSystem)
     {
+        const ColorComponents components = ColorComponents.RedGreenBlueAlpha;
+        
         var stream = fileSystem.OpenRead(path);
         using var memory = new MemoryStream();
         stream.CopyTo(memory);
         var fontData = memory.ToArray();
         
-        var fontStream = FontAtlasGenerator.Generate(fontData, out var glyphs, size);
-        var result = ImageResult.FromStream(fontStream, ColorComponents.RedGreenBlueAlpha);
-        var texture = new Texture(new Vector2i(result.Width, result.Height), result.Data, (int) ColorComponents.RedGreenBlueAlpha, Rect2.UV);
+        var fontStream = FontAtlasGenerator.Generate(fontData, out var glyphs, out var ascent, out var descent, out var lineGap, out var scale, size);
+        var result = ImageResult.FromStream(fontStream, components);
+        var texture = new Texture(new Vector2i(result.Width, result.Height), result.Data, (int) components, Rect2.UV);
         
-        return new Font(texture, glyphs, size);
+        return new Font(texture, glyphs, ascent, descent, lineGap, scale, size);
     }
 }

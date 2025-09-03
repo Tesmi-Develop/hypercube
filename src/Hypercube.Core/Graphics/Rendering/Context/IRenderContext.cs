@@ -38,7 +38,7 @@ public interface IRenderContext
     /// <param name="position">The position on the screen where the text will be drawn.</param>
     /// <param name="color">The color of the text.</param>
     /// <param name="scale">The scale factor for the text.</param>
-    void DrawText(string text, Font font, Vector2 position, Color color, float scale = 1f);
+    void DrawText(string text, Font font, Vector2 position, Color color, float scale = 1f, bool snapToPixels = false);
     
     /// <summary>
     /// Draws a rectangle on the screen.

@@ -1,35 +1,87 @@
-﻿using Hypercube.Mathematics.Shapes;
+﻿using Hypercube.Core.Graphics.Utilities.Helpers;
+using Hypercube.Mathematics.Shapes;
 using Hypercube.Mathematics.Vectors;
 using StbImageWriteSharp;
 using StbTrueTypeSharp;
 
 namespace Hypercube.Core.Graphics.Fonts;
 
-public class FontAtlasGenerator
+public static class FontAtlasGenerator
 {
-    public static unsafe Stream Generate(byte[] fontData, out Dictionary<char, Glyph> glyphs, int fontSize = 32)
+    public static unsafe Stream Gen(byte[] data, int width, int height, int padding, float spread = 8f)
     {
+        var font = StbTrueTypeHelper.GetFont(data);
+        StbTrueTypeHelper.GetFontVMetrics(font, out var ascent, out var descent, out var lineGap);
+        StbTrueTypeHelper.GetFontBoundingBox(font, out var boundingBox);
+
+        foreach (var @char in StbTrueTypeHelper.GetFontChars(font))
+        {
+            StbTrueTypeHelper.GetGlyphIndex(font, @char, out var glyphIndex);
+            StbTrueTypeHelper.GetGlyphBitmap(font, glyphIndex, Vector2.One, out var bitmap, out var size, out var offset);
+        }
+        
+        var info = new FontInfo();
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static unsafe Stream Generate(byte[] fontData, out Dictionary<char, Glyph> glyphs, out int ascent, out int descent, out int lineGap, out float scale, int fontSize = 32)
+    {
+        const int padding = 2;
+
         glyphs = [];
 
         var fontInfo = new StbTrueType.stbtt_fontinfo();
-        
         fixed (byte* fontPtr = fontData)
             StbTrueType.stbtt_InitFont(fontInfo, fontPtr, 0);
 
-        var scale = StbTrueType.stbtt_ScaleForPixelHeight(fontInfo, fontSize);
-
-        int ascent, descent, lineGap;
-        StbTrueType.stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
-        var baseline = ascent * scale;
+        scale = StbTrueType.stbtt_ScaleForPixelHeight(fontInfo, fontSize);
+        StbTrueTypeHelper.GetFontVMetrics(fontInfo, out ascent, out descent, out lineGap);
         
-        const int padding = 2;
-        const int firstChar = 32;
-        const int lastChar = 126;
-        const int charCount = lastChar - firstChar + 1;
-
-        var columns = (int) Math.Ceiling(Math.Sqrt(charCount));
+        var chars = new List<char>();
+        for (var codepoint = 0; codepoint <= 0xFFFF; codepoint++)
+        {
+            if (StbTrueType.stbtt_FindGlyphIndex(fontInfo, (char) codepoint) == 0)
+                continue;
+            
+            chars.Add((char) codepoint);
+        }
+        
+        var charCount = chars.Count;
+        var columns = (int)Math.Ceiling(Math.Sqrt(charCount));
         var cellSize = fontSize + padding;
-        var rows = (int) Math.Ceiling(charCount / (float)columns);
+        var rows = (int)Math.Ceiling(charCount / (float)columns);
         var atlasWidth = columns * cellSize;
         var atlasHeight = rows * cellSize;
 
@@ -37,7 +89,7 @@ public class FontAtlasGenerator
         var pixelData = new byte[atlasWidth * atlasHeight * 4];
         int x = 0, y = 0;
 
-        for (var c = (char) firstChar; c <= (char) lastChar; c++)
+        foreach (var c in chars)
         {
             var glyphIndex = StbTrueType.stbtt_FindGlyphIndex(fontInfo, c);
             int width, height, xOffset, yOffset;
@@ -79,16 +131,17 @@ public class FontAtlasGenerator
             {
                 Character = c,
                 SourceRect = new Rect2(x, y, x + width, y + height),
-                Offset = new Vector2(xOffset, baseline - yOffset),
-                Advance = advanceWidth * scale
+                Offset = new Vector2(xOffset, yOffset),
+                Advance = advanceWidth
             });
 
             x += cellSize;
-            if (x + cellSize > atlasWidth)
-            {
-                x = 0;
-                y += cellSize;
-            }
+            
+            if (x + cellSize <= atlasWidth)
+                continue;
+            
+            x = 0;
+            y += cellSize;
         }
 
         var stream = new MemoryStream();

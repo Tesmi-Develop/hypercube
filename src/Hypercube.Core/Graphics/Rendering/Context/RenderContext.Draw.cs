@@ -43,59 +43,97 @@ public partial class RenderContext
             _renderingApi.PushIndex(start, i + 2);
         }
     }
-    
-    public void DrawText(string text, Font font, Vector2 position, Color color, float scale = 1f)
+
+    public void DrawText(string text, Font font, Vector2 position, Color color, float scale = 1f,
+        bool snapToPixels = false)
     {
         if (_renderingApi.TexturingShaderProgram is null)
             throw new Exception("Texturing shader program is not initialized.");
-        
+
         if (string.IsNullOrEmpty(text))
             return;
 
         if (font.Texture.Gpu is null)
             font.Texture.GpuBind(_renderingApi);
-        
-        // Starting position for rendering
-        var penPosition = position;
 
-        // Using a texture shader and font as a texture
+        // Current pen position (X resets per line, Y increases by line height).
+        float penX = position.X;
+        float penY = position.Y;
+
+        // Convert from font units to pixels, then apply user render scale.
+        float fontToPx = font.Scale * scale;
+
+        // Baseline for the current line (Baseline already includes font.Scale inside Font).
+        float baselineY = penY - font.Baseline * scale;
+        
         _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram.Handle, font.Texture.Gpu?.Handle);
 
-        foreach (var c in text)
+        // For kerning (optional): char prev = '\0';
+        foreach (var ch in text)
         {
-            if (!font.Glyphs.TryGetValue(c, out var glyph))
+            // Handle CR/LF
+            if (ch == '\r')
+                continue;
+
+            if (ch == '\n')
             {
-                // Can be replaced by a space or skip
+                // Move to next line
+                penX = position.X;
+                penY -= font.LineHeight * fontToPx;
+                baselineY = penY - font.Baseline * fontToPx;
+                // prev = '\0';
                 continue;
             }
 
-            // Calculate glyph size and position
-            var glyphSize = glyph.SourceRect.Size * scale;
-            var glyphPosition = new Vector2(
-                penPosition.X + glyph.Offset.X * scale,
-                penPosition.Y
-            );
+            if (!font.Glyphs.TryGetValue(ch, out var glyph))
+            {
+                // Fallback: advance by a space width (tune this to your font metrics)
+                penX += (font.Size * 0.5f) * fontToPx;
+                // prev = '\0';
+                continue;
+            }
 
-            // Glyph square in local coordinates
+            // Optional kerning (if you have it):
+            // if (font.TryGetKerning(prev, ch, out float kern)) penX += kern * fontToPx;
+
+            // Place the top-left corner of the glyph bitmap relative to the baseline.
+            float gx = penX + glyph.Offset.X * fontToPx; // bearingX
+            float gy = baselineY + glyph.Offset.Y * fontToPx; // baseline - bearingY
+
+            // Optional pixel snapping to avoid texture sampling jitter.
+            if (snapToPixels)
+            {
+                gx = MathF.Round(gx);
+                gy = MathF.Round(gy);
+            }
+
+            // The atlas rect is in pixels already. Apply only the render scale.
+            var glyphSizePx = glyph.SourceRect.Size * fontToPx;
+
+            // Build quad in your screen coordinate system (Y-down assumed).
             var quad = new Rect2(
-                new Vector2(glyphPosition.X, glyphPosition.Y + glyphSize.Y),
-                new Vector2(glyphPosition.X + glyphSize.X, glyphPosition.Y)
-            );
-            
-            var textureSize = font.Texture.Size; 
-            var uv = new Rect2(
-                new Vector2(glyph.SourceRect.TopLeft.X / textureSize.X, glyph.SourceRect.TopLeft.Y / textureSize.Y),
-                new Vector2(glyph.SourceRect.BottomRight.X / textureSize.X, glyph.SourceRect.BottomRight.Y / textureSize.Y)
+                new Vector2(gx, gy + glyphSizePx.Y), // top-left (меньший Y)
+                new Vector2(gx + glyphSizePx.X, gy) // bottom-right (больший Y)
             );
 
-            // Adding a glyph to a patch
+            // UVs (normalize by atlas size)
+            var texSize = font.Texture.Size;
+            var uv = new Rect2(
+                new Vector2(glyph.SourceRect.TopLeft.X / texSize.X, glyph.SourceRect.TopLeft.Y / texSize.Y),
+                new Vector2(glyph.SourceRect.BottomRight.X / texSize.X, glyph.SourceRect.BottomRight.Y / texSize.Y)
+            );
+
             AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, quad, uv, color);
 
-            // Shift the stylus to Advance (horizontal shift)
-            penPosition = new Vector2(penPosition.X + glyph.Advance * scale, penPosition.Y);
+            // Advance pen in X (advance is in font units → convert with fontToPx)
+            penX += glyph.Advance * fontToPx;
+
+            // prev = ch;
         }
+        
+        DrawLine(new Vector2(position.X, baselineY), new Vector2(penX, baselineY), Color.Red, 1f);
     }
-    
+
     public void DrawTexture(Texture texture, Vector2 position, Angle rotation, Vector2 scale, Color color)
     {
         if (_renderingApi.TexturingShaderProgram is null)
