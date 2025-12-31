@@ -1,7 +1,6 @@
 ﻿using Hypercube.Core.Graphics;
 using Hypercube.Core.Graphics.Rendering.Api;
 using Hypercube.Mathematics;
-using Hypercube.Mathematics.Vectors;
 using Hypercube.Utilities.Configuration;
 using Hypercube.Utilities.Debugging.Logger;
 

@@ -4,7 +4,7 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Transform;
 
-public sealed class TransformComponent : Component
+public struct TransformComponent() : IComponent
 {
     public Entity? Parent;
     public Vector2 LocalPosition;

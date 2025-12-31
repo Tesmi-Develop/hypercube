@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Hypercube.Core.Ecs.Core.Events;
-using Hypercube.Core.Ecs.Core.Query;
+﻿using Hypercube.Core.Ecs.Core.Events;
 
 namespace Hypercube.Core.Ecs;
 
@@ -16,8 +14,6 @@ public interface IWorld
     /// </summary>
     int Id { get; }
 
-    EntityQueryBuilder EntityQueryBuilder { get; }
-    
     /// <summary>
     /// Updates the world logic. Called every frame or tick.
     /// </summary>
@@ -50,9 +46,9 @@ public interface IWorld
     /// <typeparam name="T">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <param name="entity">The entity to add the component to.</param>
     /// <returns>True if the component was added successfully, otherwise false.</returns>
-    bool AddComponent<T>(Entity entity) where T : IComponent;
+    bool AddComponent<T>(Entity entity) where T : struct, IComponent;
     
-    bool AddComponent(Entity entity, Component component);
+    bool AddComponent<T>(Entity entity, T component) where T : struct, IComponent;
     
     /// <summary>
     /// Removes a component of type <typeparamref name="T"/> from the specified entity.
@@ -60,7 +56,7 @@ public interface IWorld
     /// <typeparam name="T">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <param name="entity">The entity to remove the component from.</param>
     /// <returns>True if the component was removed successfully, otherwise false.</returns>
-    bool RemoveComponent<T>(Entity entity) where T : IComponent;
+    bool RemoveComponent<T>(Entity entity) where T : struct, IComponent;
 
     /// <summary>
     /// Checks if the specified entity has a component of type <typeparamref name="T"/>.
@@ -68,7 +64,7 @@ public interface IWorld
     /// <typeparam name="T">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <param name="entity">The entity to check.</param>
     /// <returns>True if the entity has the component, otherwise false.</returns>
-    bool HasComponent<T>(Entity entity) where T : IComponent;
+    bool HasComponent<T>(Entity entity) where T : struct, IComponent;
 
     /// <summary>
     /// Retrieves a component of type <typeparamref name="T"/> from the specified entity.
@@ -76,7 +72,7 @@ public interface IWorld
     /// <typeparam name="T">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <param name="entity">The entity to get the component from.</param>
     /// <returns>The component instance of type <typeparamref name="T"/>.</returns>
-    T GetComponent<T>(Entity entity) where T : IComponent;
+    ref T GetComponent<T>(Entity entity) where T : struct, IComponent;
 
     /// <summary>
     /// Attempts to retrieve a component of type <typeparamref name="T"/> from the specified entity.
@@ -85,8 +81,8 @@ public interface IWorld
     /// <param name="entity">The entity to get the component from.</param>
     /// <param name="component">Output parameter for the component if found.</param>
     /// <returns>True if the component was found, otherwise false.</returns>
-    bool TryGetComponent<T>(Entity entity, [NotNullWhen(true)] out T? component)
-        where T : IComponent;
+    bool TryGetComponent<T>(Entity entity, out T component)
+        where T : struct, IComponent;
 
     /// <summary>
     /// Ensures that the specified entity has a component of type <typeparamref name="T"/>.
@@ -95,7 +91,7 @@ public interface IWorld
     /// <typeparam name="T">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <param name="entity">The entity to ensure the component for.</param>
     /// <returns>The component instance of type <typeparamref name="T"/>.</returns>
-    T EnsureComponent<T>(Entity entity) where T : IComponent;
+    T EnsureComponent<T>(Entity entity) where T : struct, IComponent;
 
     /// <summary>
     /// Raises an event for a specific component and entity.
@@ -105,8 +101,8 @@ public interface IWorld
     /// <param name="entity">The entity associated with the event.</param>
     /// <param name="component">The component associated with the event.</param>
     /// <param name="ev">The event to raise.</param>
-    public void Raise<TComp, TEvent>(Entity entity, TComp component, ref TEvent ev)
-        where TComp : IComponent where TEvent : IEvent;
+    void Raise<TComp, TEvent>(Entity entity, ref TComp component, ref TEvent ev)
+        where TComp : struct, IComponent where TEvent : IEvent;
 
     /// <summary>
     /// Subscribes a handler to events of type <typeparamref name="TEvent"/> for components of type <typeparamref name="TComp"/>.
@@ -114,6 +110,6 @@ public interface IWorld
     /// <typeparam name="TComp">The type of the component, which must implement <see cref="IComponent"/>.</typeparam>
     /// <typeparam name="TEvent">The type of the event, which must implement <see cref="IEvent"/>.</typeparam>
     /// <param name="handler">The handler to subscribe.</param>
-    public void Subscribe<TComp, TEvent>(EventRefHandler<TComp, TEvent> handler)
-        where TComp : IComponent where TEvent : IEvent;
+    void Subscribe<TComp, TEvent>(EventRefHandler<TComp, TEvent> handler)
+        where TComp : struct, IComponent where TEvent : IEvent;
 }

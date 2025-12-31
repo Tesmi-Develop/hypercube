@@ -1,7 +1,5 @@
 ﻿using Hypercube.Core.Ecs;
 using Hypercube.Core.Ecs.Attributes;
-using Hypercube.Core.Systems.Transform;
-using Hypercube.Utilities.Dependencies;
 
 namespace Hypercube.Core.Systems.Physics;
 

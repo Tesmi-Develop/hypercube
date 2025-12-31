@@ -92,22 +92,22 @@ public class WorldEventBus
     #endregion
 
     #region Directed Events (Entity + Component)
-    public void Raise<TComp, TEvent>(Entity entity, TComp component, ref TEvent ev)
-        where TComp : IComponent where TEvent : IEvent
+    public void Raise<TComp, TEvent>(Entity entity, ref TComp component, ref TEvent ev)
+        where TComp : struct, IComponent where TEvent : IEvent
     {
         ProcessDirectedEvent<TComp, TEvent>(ref entity, ref component, ref Unsafe.As<TEvent, Unit>(ref ev));
     }
 
     public void Subscribe<TComp, TEvent>(EventRefHandler<TComp, TEvent> handler)
-        where TComp : IComponent where TEvent : IEvent
+        where TComp : struct, IComponent where TEvent : IEvent
     {
         SubscribeEventCommon<TEvent>((ref Entity entity, ref IComponent component, ref Unit unit) =>
         {
-            if (component is not TComp castedComponent)
+            if (component is not TComp)
                 return;
             
             ref var tev = ref Unsafe.As<Unit, TEvent>(ref unit);
-            handler(ref entity, ref castedComponent, ref tev);
+            handler(ref entity, ref Unsafe.As<IComponent, TComp>(ref component), ref tev);
         }, handler);
     }
 
@@ -121,16 +121,13 @@ public class WorldEventBus
     }
     
     private void ProcessDirectedEvent<TComp, TEvent>(ref Entity entity, ref TComp component, ref Unit unit)
-        where TComp : IComponent where TEvent : IEvent
+        where TComp : struct, IComponent where TEvent : IEvent
     {
         if (!_eventRegistration.TryGetValue(typeof(TEvent), out var eventSubscriptions))
             return;
 
-        if (component is not IComponent castedComponent)
-            throw new InvalidOperationException();
-
         foreach (var subscription in eventSubscriptions)
-            subscription.Handler(ref entity, ref castedComponent, ref unit);
+            subscription.Handler(ref entity, ref Unsafe.As<TComp, IComponent>(ref component), ref unit);
     }
     #endregion
 }

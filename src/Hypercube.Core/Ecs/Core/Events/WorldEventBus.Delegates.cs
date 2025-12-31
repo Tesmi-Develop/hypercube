@@ -21,4 +21,5 @@ public delegate void EventRefHandler(ref Entity entity, ref IComponent component
 
 [EngineInternal]
 public delegate void EventRefHandler<TComp, TEvent>(ref Entity entity, ref TComp component, ref TEvent args)
-    where TComp : IComponent where TEvent : IEvent;
+    where TComp : struct, IComponent where TEvent : IEvent;
+    

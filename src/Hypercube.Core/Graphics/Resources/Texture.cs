@@ -53,4 +53,9 @@ public sealed class Texture : Resource, IImage
         Gpu?.Dispose();
         Gpu = null;
     }
+
+    public override string ToString()
+    {
+        return _data.GetHashCode().ToString();
+    }
 }

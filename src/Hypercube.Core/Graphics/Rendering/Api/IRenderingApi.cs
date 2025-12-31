@@ -1,5 +1,4 @@
 ﻿using Hypercube.Core.Graphics.Rendering.Api.Handlers;
-using Hypercube.Core.Graphics.Rendering.Api.Settings;
 using Hypercube.Core.Graphics.Rendering.Batching;
 using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Core.Graphics.Texturing;

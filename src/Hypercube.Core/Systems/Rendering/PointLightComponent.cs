@@ -3,7 +3,8 @@ using Hypercube.Mathematics;
 
 namespace Hypercube.Core.Systems.Rendering;
 
-public class PointLightComponent : Component
+[PublicAPI]
+public struct PointLightComponent() : IComponent
 {
     public float Radius;
     public float Intensity;

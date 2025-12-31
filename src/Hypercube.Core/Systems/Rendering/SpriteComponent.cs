@@ -7,7 +7,7 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Rendering;
 
-public sealed class SpriteComponent : Component
+public struct SpriteComponent() : IComponent
 {
     public Texture? Texture;
 

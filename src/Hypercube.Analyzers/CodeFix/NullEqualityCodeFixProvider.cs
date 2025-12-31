@@ -1,15 +1,16 @@
 ﻿using System.Collections.Immutable;
 using System.Composition;
+using Hypercube.Analyzers.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Hypercube.Analyzers;
+namespace Hypercube.Analyzers.CodeFix;
 
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NullEqualityCodeFixProvider))]
 [Shared]
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NullEqualityCodeFixProvider))]
 public sealed class NullEqualityCodeFixProvider : CodeFixProvider
 {
     public override ImmutableArray<string> FixableDiagnosticIds => [NullEqualityAnalyzer.DiagnosticId];
@@ -31,7 +32,7 @@ public sealed class NullEqualityCodeFixProvider : CodeFixProvider
         if (node is null)
             return;
 
-        var title = "Replace with 'is null' / 'is not null'";
+        const string title = "Replace with \"is\"";
         context.RegisterCodeFix(
             CodeAction.Create(
                 title,
@@ -42,7 +43,6 @@ public sealed class NullEqualityCodeFixProvider : CodeFixProvider
 
     private static async Task<Document> ReplaceWithIsNullAsync(Document document, BinaryExpressionSyntax binary, CancellationToken cancellationToken)
     {
-        // Если выражение - это `x == null` или `x != null`
         if (!binary.IsKind(SyntaxKind.EqualsExpression) && !binary.IsKind(SyntaxKind.NotEqualsExpression))
             return document;
         
@@ -68,6 +68,8 @@ public sealed class NullEqualityCodeFixProvider : CodeFixProvider
 
     }
 
-    private static bool IsNullLiteral(ExpressionSyntax node) =>
-        node.IsKind(SyntaxKind.NullLiteralExpression);
+    private static bool IsNullLiteral(ExpressionSyntax node)
+    {
+        return node.IsKind(SyntaxKind.NullLiteralExpression);
+    }
 }

@@ -8,9 +8,9 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Rendering;
 
-public class ModelComponent : Component
+public struct ModelComponent() : IComponent
 {
-    public Model? Model;
+    public Model? Model = null;
 
     [DataField("model")]
     public ResourcePath Path = ResourcePath.Empty;

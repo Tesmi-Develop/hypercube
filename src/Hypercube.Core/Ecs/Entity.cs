@@ -1,17 +1,24 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Hypercube.Core.Ecs.Core;
 
 namespace Hypercube.Core.Ecs;
 
+[PublicAPI]
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct Entity : IDisposable, IEquatable<Entity>
 {
-    public readonly int Id;
-    public readonly World World;
+    public readonly EntityId Id;
+    public readonly int WorldId;
 
-    public Entity(int id, World world)
+    public Entity(EntityId id, int worldId)
     {
         Id = id;
-        World = world;
+        WorldId = worldId;
+    }
+
+    public Entity(EntityId id, World world) : this(id, world.Id)
+    {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -22,7 +29,7 @@ public readonly struct Entity : IDisposable, IEquatable<Entity>
 
     public bool Equals(Entity other)
     {
-        return Id == other.Id && World == other.World;
+        return Id == other.Id && WorldId == other.WorldId;
     }
 
     public override bool Equals(object? obj)
@@ -32,12 +39,12 @@ public readonly struct Entity : IDisposable, IEquatable<Entity>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, World);
+        return HashCode.Combine(Id, WorldId);
     }
     
     public override string ToString()
     {
-        return $"Entity {World}:{Id}";
+        return $"Entity {WorldId}:{Id}";
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

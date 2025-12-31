@@ -1,9 +1,11 @@
-﻿namespace Hypercube.Editor;
+﻿using Hypercube.Core;
+
+namespace Hypercube.Editor;
 
 public static class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        FrameworkEntering.Start(args);
     }
 }

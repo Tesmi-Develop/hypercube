@@ -21,11 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Serialization\Yaml\SourceGenerator\" />
-    <Folder Include="Serialization\Yaml\Utilities\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="$(SolutionDir)libs/**" Link="%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
     <None Include="$(SolutionDir)resources/**" Link="resources/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>

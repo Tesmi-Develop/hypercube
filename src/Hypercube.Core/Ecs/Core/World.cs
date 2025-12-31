@@ -1,10 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using Hypercube.Core.Ecs.Core.Components;
 using Hypercube.Core.Ecs.Core.Events;
 using Hypercube.Core.Ecs.Core.Query;
 using Hypercube.Core.Ecs.Events;
+using Hypercube.Core.Systems.Rendering;
+using Hypercube.Mathematics;
 using Hypercube.Utilities.Collections;
 using Hypercube.Utilities.Dependencies;
 
@@ -23,8 +24,6 @@ public sealed class World : IWorld
     private readonly DependenciesContainer _container;
     private readonly WorldEventBus _eventBus = new();
     private readonly NumPool<int> _entityPool = new();
-
-    public EntityQueryBuilder EntityQueryBuilder => new(this);
     
     public World(int id, List<Type> systems, DependenciesContainer? container = null)
     {
@@ -72,29 +71,33 @@ public sealed class World : IWorld
     
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool AddComponent<T>(Entity entity) where T : IComponent
+    public bool AddComponent<T>(Entity entity) where T : struct, IComponent
     {
-        var component = InstantiateComponent<T>();
-        var result =  GetComponentMapper<T>().Set(entity.Id, component);
+        var component = new T();
+        var result = GetComponentMapper<T>().Set(entity.Id, component);
         var ev = new AddedEvent();
         
-        _eventBus.Raise(entity, component, ref ev);
+        _eventBus.Raise(entity, ref component, ref ev);
         return result;
     }
     
+    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool AddComponent(Entity entity, Component component)
+    public bool AddComponent<T>(Entity entity, T component)
+        where T : struct, IComponent
     {
-        var result = _componentPools[component.GetType()].Set(entity.Id, component);
-        var ev = new AddedEvent();
+        var mapper = GetComponentMapper<T>();
         
-        _eventBus.Raise(entity, component, ref ev);
+        var result = mapper.Set(entity.Id, in component);
+        var ev = new AddedEvent();
+
+        _eventBus.Raise(entity, ref mapper.Get(entity.Id), ref ev);
         return result;
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool RemoveComponent<T>(Entity entity) where T : IComponent
+    public bool RemoveComponent<T>(Entity entity) where T : struct, IComponent
     {
         var pool = GetComponentMapper<T>();
         if (!pool.Remove(entity.Id))
@@ -103,44 +106,44 @@ public sealed class World : IWorld
         var component = pool.Get(entity.Id);
         var ev = new RemovedEvent();
         
-        _eventBus.Raise(entity, component, ref ev);
+        _eventBus.Raise(entity, ref component, ref ev);
         return true;
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasComponent<T>(Entity entity) where T : IComponent
+    public bool HasComponent<T>(Entity entity) where T : struct, IComponent
     {
         return GetComponentMapper<T>().Has(entity.Id);
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T GetComponent<T>(Entity entity) where T : IComponent
+    public ref T GetComponent<T>(Entity entity) where T : struct, IComponent
     {
-        return GetComponentMapper<T>().Get(entity.Id);
+        return ref GetComponentMapper<T>().Get(entity.Id);
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T EnsureComponent<T>(Entity entity) where T : IComponent
+    public T EnsureComponent<T>(Entity entity) where T : struct, IComponent
     {
         var pool = GetComponentMapper<T>();
         if (pool.Has(entity.Id))
             return pool.Get(entity.Id);
         
-        var component = InstantiateComponent<T>();
+        var component = new T();
         var ev = new AddedEvent();
             
-        pool.Set(entity.Id, component);
+        pool.Set(entity.Id, in component);
             
-        _eventBus.Raise(entity, component, ref ev);
+        _eventBus.Raise(entity, ref component, ref ev);
         return component;
     }
     
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool TryGetComponent<T>(Entity entity, [NotNullWhen(true)] out T? component) where T : IComponent
+    public bool TryGetComponent<T>(Entity entity, out T component) where T : struct, IComponent
     {
         component = default;
         return GetComponentMapper<T>().TryGet(entity.Id, ref component);
@@ -148,18 +151,38 @@ public sealed class World : IWorld
     
     #endregion
 
+    #region Query
+
+    public Query<T> GetEntityQuery<T>()
+        where T : struct, IComponent
+    {
+        return new Query<T>(GetComponentMapper<T>());
+    }
+    
+    public Query<T1, T2> GetEntityQuery<T1, T2>()
+        where T1 : struct, IComponent
+        where T2 : struct, IComponent
+    {
+        return new Query<T1, T2>(
+            GetComponentMapper<T1>(),
+            GetComponentMapper<T2>()
+        );
+    }
+
+    #endregion
+    
     #region Subscription
 
     /// <inheritdoc/>
-    public void Raise<TComp, TEvent>(Entity entity, TComp component, ref TEvent ev)
-        where TComp : IComponent where TEvent : IEvent
+    public void Raise<TComp, TEvent>(Entity entity, ref TComp component, ref TEvent ev)
+        where TComp : struct, IComponent where TEvent : IEvent
     {
-        _eventBus.Raise(entity, component, ref ev);
+        _eventBus.Raise(entity, ref component, ref ev);
     }
 
     /// <inheritdoc/>
     public void Subscribe<TComp, TEvent>(EventRefHandler<TComp, TEvent> handler)
-        where TComp : IComponent where TEvent : IEvent
+        where TComp : struct, IComponent where TEvent : IEvent
     {
         _eventBus.Subscribe(handler);
     }
@@ -167,8 +190,8 @@ public sealed class World : IWorld
     #endregion
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ComponentMapper<T> GetComponentMapper<T>()
-        where T : IComponent
+    private ComponentMapper<T> GetComponentMapper<T>()
+        where T : struct, IComponent
     {
         if (_componentPools.TryGetValue(typeof(T), out var pool))
             return (ComponentMapper<T>) pool;
@@ -229,22 +252,5 @@ public sealed class World : IWorld
         propertyInfo?.SetValue(instance, this);
 
         return (IEntitySystem) instance;
-    }
-    
-    private T InstantiateSystem<T>() where T : IEntitySystem
-    {
-        return (T) InstantiateSystem(typeof(T));
-    }
-
-    private T InstantiateComponent<T>() where T : IComponent
-    {
-        var constructors = typeof(T).GetConstructors();
-        if (constructors.Length == 0)
-            throw new Exception();
-        
-        var constructor = constructors[0];
-        var instance = constructor.Invoke(null);
-
-        return (T) instance;
     }
 }

@@ -3,7 +3,7 @@ using Hypercube.Mathematics.Vectors;
 
 namespace Hypercube.Core.Systems.Physics;
 
-public sealed class PhysicsComponent : Component
+public struct PhysicsComponent : IComponent
 {
     public Vector2 LinearVelocity;
     public float AngularVelocity;
