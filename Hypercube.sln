@@ -8,6 +8,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypercube.Runner", "src\Hyp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypercube.Editor", "src\Hypercube.Editor\Hypercube.Editor.csproj", "{28CCC0B6-D9D0-49ED-8213-B12F2948A3FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypercube.Mathematics", "submodules\mathematics\src\Hypercube.Mathematics\Hypercube.Mathematics.csproj", "{0588EB08-3DD7-442F-A34F-C3CF12661BAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypercube.Utilities", "submodules\utilities\src\Hypercube.Utilities\Hypercube.Utilities.csproj", "{A7130558-4DB5-4C14-9C6C-350C4E344451}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypercube.ModLoader", "submodules\modloader\src\Hypercube.ModLoader\Hypercube.ModLoader.csproj", "{4742F272-EF75-43ED-BDED-68BB9370E0F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{5DFB368C-9ACA-4E7E-BDEA-F35993915F61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +37,22 @@ Global
 		{28CCC0B6-D9D0-49ED-8213-B12F2948A3FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28CCC0B6-D9D0-49ED-8213-B12F2948A3FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28CCC0B6-D9D0-49ED-8213-B12F2948A3FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0588EB08-3DD7-442F-A34F-C3CF12661BAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0588EB08-3DD7-442F-A34F-C3CF12661BAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0588EB08-3DD7-442F-A34F-C3CF12661BAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0588EB08-3DD7-442F-A34F-C3CF12661BAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7130558-4DB5-4C14-9C6C-350C4E344451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7130558-4DB5-4C14-9C6C-350C4E344451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7130558-4DB5-4C14-9C6C-350C4E344451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7130558-4DB5-4C14-9C6C-350C4E344451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4742F272-EF75-43ED-BDED-68BB9370E0F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4742F272-EF75-43ED-BDED-68BB9370E0F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4742F272-EF75-43ED-BDED-68BB9370E0F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4742F272-EF75-43ED-BDED-68BB9370E0F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0588EB08-3DD7-442F-A34F-C3CF12661BAC} = {5DFB368C-9ACA-4E7E-BDEA-F35993915F61}
+		{4742F272-EF75-43ED-BDED-68BB9370E0F1} = {5DFB368C-9ACA-4E7E-BDEA-F35993915F61}
+		{A7130558-4DB5-4C14-9C6C-350C4E344451} = {5DFB368C-9ACA-4E7E-BDEA-F35993915F61}
 	EndGlobalSection
 EndGlobal

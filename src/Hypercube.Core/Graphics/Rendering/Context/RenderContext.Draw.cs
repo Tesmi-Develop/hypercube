@@ -26,11 +26,11 @@ public sealed partial class RenderContext
         
         foreach (var (v, vt, vn) in model.Indices)
         {
-            var vertexPosition = matrix.Transform(model.Vertices[v]);
+            var vertexPosition = matrix * model.Vertices[v];
             
             var uv = vt >= 0 && vt < model.UVs.Length ? model.UVs[vt] : Vector2.Zero;;
             var normal = vn >= 0 && vn < model.Normals.Length
-                ? matrix.Transform(model.Normals[vn]).Normalized
+                ? matrix * model.Normals[vn].Normalized
                 : Vector3.UnitZ;
     
             _renderingApi.PushVertex(new Vertex(vertexPosition.Xy, uv, color, normal));
@@ -78,7 +78,7 @@ public sealed partial class RenderContext
             Matrix4x4.CreateTranslation(position);
         
         _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram.Handle, texture.Gpu?.Handle);
-        AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, matrix.Transform(rect), Rect2.UV, color);
+        AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, matrix * rect, Rect2.UV, color);
     }
     
     public void DrawRectangle(Rect2 box, Color color, bool outline = false)
@@ -87,7 +87,7 @@ public sealed partial class RenderContext
             throw new Exception();
         
         _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
-        AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, Matrix4x4.Identity.Transform(box), Rect2.UV, color);
+        AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, Matrix4x4.Identity * box, Rect2.UV, color);
     }
     
     public void DrawLine(Vector2 start, Vector2 end, Color color, float thickness = 1f)
