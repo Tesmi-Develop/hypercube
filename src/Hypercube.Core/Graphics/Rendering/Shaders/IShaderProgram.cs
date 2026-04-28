@@ -100,6 +100,8 @@ public interface IShaderProgram : IDisposable
     /// Indicates whether the matrix should be transposed before uploading.
     /// </param>
     void SetUniform(string name, Matrix4x4 value, bool transpose = false);
+    
+    void SetUniform(string name, Matrix4x4[] value, bool transpose = false);
 
     /// <summary>
     /// Sets a color uniform value.

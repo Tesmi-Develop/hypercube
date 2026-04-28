@@ -51,6 +51,7 @@ public interface IRenderingApi
     /// </summary>
     void BreakCurrentBatch();
 
+    int PushMatrix(Matrix4x4 matrix);
     void PushVertex(Vertex vertex);
     void PushIndex(uint start, uint offset);
     void PushIndex(int start, int index);

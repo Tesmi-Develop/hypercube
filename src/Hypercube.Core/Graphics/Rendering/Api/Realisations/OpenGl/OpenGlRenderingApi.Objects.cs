@@ -136,22 +136,33 @@ public sealed partial class OpenGlRenderingApi
         public unsafe void SetData(int size, nint data, BufferUsageARB hint = BufferUsageARB.StaticDraw)
         {
             Bind();
-            
             _gl.BufferData(_target, (nuint) size, (void*) data, hint);
         }
 
-        public unsafe void SetSubData(int size, nint data)
+        public unsafe void SetSubData(int size, nint data, nint offset = 0)
         {
             Bind();
-            throw new NotImplementedException();
+            _gl.BufferSubData(_target, offset, (nuint) size, (void*) data);
         }
     
+        public unsafe void SetSubData<T>(T[] data, nint offset = 0) where T : unmanaged
+        {
+            Bind();
+            fixed (T* ptr = data)
+                _gl.BufferSubData(_target, offset, (nuint) (data.Length * sizeof(T)), ptr);
+        }
+        
         public unsafe void SetData<T>(T[] data, BufferUsageARB hint = BufferUsageARB.StaticDraw) where T : unmanaged
         {
             Bind();
-            
-            fixed (T* dataPtr = data)
-                _gl.BufferData(_target, (nuint) (data.Length * sizeof(T)), dataPtr, hint);
+            fixed (T* ptr = data)
+                _gl.BufferData(_target, (nuint) (data.Length * sizeof(T)), ptr, hint);
+        }
+        
+        public unsafe void Invalidate(int size, BufferUsageARB hint = BufferUsageARB.DynamicDraw)
+        {
+            Bind();
+            _gl.BufferData(_target, (nuint) size, null, hint);
         }
         
         [PublicAPI]

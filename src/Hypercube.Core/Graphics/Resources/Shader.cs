@@ -60,6 +60,10 @@ public sealed class Shader : Resource, IShaderProgram
         => _program.SetUniform(name, value, transpose);
 
     /// <inheritdoc/>
+    public void SetUniform(string name, Matrix4x4[] value, bool transpose = false)
+        => _program.SetUniform(name, value, transpose);
+    
+    /// <inheritdoc/>
     public void SetUniform(string name, Color value) => _program.SetUniform(name, value);
 
     /// <inheritdoc/>

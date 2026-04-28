@@ -112,6 +112,15 @@ public sealed class OpenGlShaderProgram : BaseShaderProgram
         _gl.UniformMatrix4(_uniformLocations[name], 1, transpose, (float*) &value);
     }
 
+    public override unsafe void SetUniform(string name, Matrix4x4[] value, bool transpose = false)
+    {
+        var location = _uniformLocations[name];
+        fixed (Matrix4x4* ptr = value)
+        {
+            _gl.UniformMatrix4(location, (uint) value.Length, transpose, (float*) &ptr);
+        }
+    }
+    
     public override void SetUniform(string name, Color value)
     {
         _gl.Uniform4(_uniformLocations[name], value.R, value.G, value.B, value.A);

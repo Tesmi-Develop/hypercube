@@ -24,6 +24,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     public IShaderProgram? PrimitiveShaderProgram { get; protected set; }
     public IShaderProgram? TexturingShaderProgram { get; protected set; }
     
+    [PublicAPI] public int BatchMatrixIndex { get; protected set; }
     [PublicAPI] public int BatchVerticesIndex { get; protected set; }
     [PublicAPI] public int BatchIndicesIndex { get; protected set; }
     
@@ -31,6 +32,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     
     [PublicAPI] protected readonly List<Batch> Batches = [];
     
+    protected readonly Matrix4x4[] BatchMatrices;
     protected readonly Vertex[] BatchVertices;
     protected readonly uint[] BatchIndices;
     
@@ -46,13 +48,12 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     protected BaseRenderingApi(RenderingApiSettings settings, IWindowingApi windowingApi)
     {
         ClearColor = settings.ClearColor;
+        
+        BatchMatrices = new Matrix4x4[256];
         BatchVertices = new Vertex[settings.MaxVertices];
         BatchIndices = new uint[settings.MaxIndices];
-        WindowingApi = windowingApi;
         
-        // Инициализируем дефолтным состоянием
-        _renderStates.Add(RenderState.Default);
-        _currentRenderStateId = new RenderStateId(0);
+        WindowingApi = windowingApi;
     }
 
     public void Init(IContextInfoProvider context)
@@ -104,14 +105,24 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         GenerateBatch();
         _currentBatchData = null;
     }
-    
+
+    public int PushMatrix(Matrix4x4 matrix)
+    {
+        // TODO: Add clamping and warning for index
+        var index = BatchMatrixIndex++;
+
+        BatchMatrices[index] = matrix;
+        
+        return index;
+    }
+
     public void PushVertex(Vertex vertex)
     {
         // TODO: Add clamping and warning for index
         BatchVertices[BatchVerticesIndex++] = vertex;
     }
     
-    public void PushIndex(uint start,uint offset)
+    public void PushIndex(uint start, uint offset)
     {
         // TODO: Add clamping and warning for index
         BatchIndices[BatchIndicesIndex++] = start + offset;
@@ -148,17 +159,27 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     protected void Clear()
     {
         // TODO: optimize
+        _currentBatchData = null;
+        
+        Array.Clear(BatchMatrices, 0, BatchMatrixIndex);
         Array.Clear(BatchVertices, 0, BatchVerticesIndex);
         Array.Clear(BatchIndices, 0, BatchIndicesIndex);
 
+        Batches.Clear();
+
+        BatchMatrixIndex = 0;
         BatchVerticesIndex = 0;
         BatchIndicesIndex = 0;
-
-        _currentBatchData = null;
-        Batches.Clear();
+        
+        // Render state
         _renderStates.Clear();
         _renderStates.Add(RenderState.Default);
+        
         _currentRenderStateId = new RenderStateId(0);
+        
+        // Model
+        BatchMatrices[0] = Matrix4x4.Identity;
+        BatchMatrixIndex = 1;
     }
     
     private void GenerateBatch()

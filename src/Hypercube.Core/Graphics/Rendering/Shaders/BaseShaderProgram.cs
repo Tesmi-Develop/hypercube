@@ -36,7 +36,8 @@ public abstract partial class BaseShaderProgram : IShaderProgram
     public abstract void SetUniform(string name, Vector4 value);
     public abstract void SetUniform(string name, Matrix3x3 value, bool transpose = false);
     public abstract void SetUniform(string name, Matrix4x4 value, bool transpose = false);
-
+    public abstract void SetUniform(string name, Matrix4x4[] value, bool transpose = false);
+    
     public void Label(string name)
     {
         InternalLabel(name);

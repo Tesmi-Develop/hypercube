@@ -88,34 +88,11 @@ public sealed partial class RenderContext
         _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
         AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, Matrix4x4.Identity * box, Rect2.UV, color);
     }
-    
-    public void DrawLine(Vector2 start, Vector2 end, Color color, float thickness = 1f)
-    {
-        if (_renderingApi.PrimitiveShaderProgram is null)
-            throw new InvalidOperationException("Primitive shader program is not initialized");
-
-        var direction = (end - start).Normalized;
-        var normal = new Vector2(-direction.Y, direction.X) * thickness / 2f;
-
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
-
-        var startIndex = _renderingApi.BatchVerticesIndex;
-        
-        _renderingApi.PushVertex(new Vertex(start - normal, Vector2.Zero, color));
-        _renderingApi.PushVertex(new Vertex(start + normal, Vector2.Zero, color));
-        _renderingApi.PushVertex(new Vertex(end - normal, Vector2.Zero, color));
-        _renderingApi.PushVertex(new Vertex(end + normal, Vector2.Zero, color));
-        
-        _renderingApi.PushIndex(startIndex, 0);
-        _renderingApi.PushIndex(startIndex, 1);
-        _renderingApi.PushIndex(startIndex, 2);
-        _renderingApi.PushIndex(startIndex, 1);
-        _renderingApi.PushIndex(startIndex, 3);
-        _renderingApi.PushIndex(startIndex, 2);
-    }
 
     public void DrawCircle(Vector2 center, float radius, Color color, int segments = 32, bool outline = false)
     {
+        
+        
         if (_renderingApi.PrimitiveShaderProgram is null)
             throw new InvalidOperationException("Primitive shader program is not initialized");
         
@@ -156,13 +133,38 @@ public sealed partial class RenderContext
             _renderingApi.PushIndex(startIndex, i % segments + 1);
         }
     }
-    
+
+    public void DrawLine(Vector2 start, Vector2 end, Color color, float thickness = 1f)
+    {
+        if (_renderingApi.PrimitiveShaderProgram is null)
+            throw new InvalidOperationException("Primitive shader program is not initialized");
+
+        var direction = (end - start).Normalized;
+        var normal = new Vector2(-direction.Y, direction.X) * thickness / 2f;
+
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
+
+        var startIndex = _renderingApi.BatchVerticesIndex;
+        
+        _renderingApi.PushVertex(new Vertex(start - normal, Vector2.Zero, color));
+        _renderingApi.PushVertex(new Vertex(start + normal, Vector2.Zero, color));
+        _renderingApi.PushVertex(new Vertex(end - normal, Vector2.Zero, color));
+        _renderingApi.PushVertex(new Vertex(end + normal, Vector2.Zero, color));
+        
+        _renderingApi.PushIndex(startIndex, 0);
+        _renderingApi.PushIndex(startIndex, 1);
+        _renderingApi.PushIndex(startIndex, 2);
+        _renderingApi.PushIndex(startIndex, 1);
+        _renderingApi.PushIndex(startIndex, 3);
+        _renderingApi.PushIndex(startIndex, 2);
+    }
+
     private void AddQuadTriangleBatch(int start, Rect4 rect, Rect2 uv, Color color)
     {
-        _renderingApi.PushVertex(new Vertex(rect.Point0, uv.TopLeft, color));
-        _renderingApi.PushVertex(new Vertex(rect.Point1, uv.TopRight, color));
+        _renderingApi.PushVertex(new Vertex(rect.Point0, uv.TopLeft,     color));
+        _renderingApi.PushVertex(new Vertex(rect.Point1, uv.TopRight,    color));
         _renderingApi.PushVertex(new Vertex(rect.Point2, uv.BottomRight, color));
-        _renderingApi.PushVertex(new Vertex(rect.Point3, uv.BottomLeft, color));
+        _renderingApi.PushVertex(new Vertex(rect.Point3, uv.BottomLeft,  color));
         
         _renderingApi.PushIndex(start, 0);
         _renderingApi.PushIndex(start, 1);
@@ -172,12 +174,50 @@ public sealed partial class RenderContext
         _renderingApi.PushIndex(start, 3);
     }
 
+    private void AddQuadTriangleBatch(int start, Rect4 rect, Rect2 uv, Color color, Matrix4x4 matrix)
+    {
+        var matrixIndex = 0;
+        if (matrix != Matrix4x4.Identity)
+            matrixIndex = _renderingApi.PushMatrix(matrix);
+        
+        _renderingApi.PushVertex(new Vertex(rect.Point0, uv.TopLeft,     color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.Point1, uv.TopRight,    color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.Point2, uv.BottomRight, color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.Point3, uv.BottomLeft,  color, matrixIndex));
+        
+        _renderingApi.PushIndex(start, 0);
+        _renderingApi.PushIndex(start, 1);
+        _renderingApi.PushIndex(start, 3);
+        _renderingApi.PushIndex(start, 1);
+        _renderingApi.PushIndex(start, 2);
+        _renderingApi.PushIndex(start, 3);
+    }
+    
     private void AddQuadTriangleBatch(int start, Rect2 rect, Rect2 uv, Color color)
     {
-        _renderingApi.PushVertex(new Vertex(rect.TopRight, uv.TopRight, color));
+        _renderingApi.PushVertex(new Vertex(rect.TopRight,    uv.TopRight,    color));
         _renderingApi.PushVertex(new Vertex(rect.BottomRight, uv.BottomRight, color));
-        _renderingApi.PushVertex(new Vertex(rect.BottomLeft, uv.BottomLeft, color));
-        _renderingApi.PushVertex(new Vertex(rect.TopLeft, uv.TopLeft, color));
+        _renderingApi.PushVertex(new Vertex(rect.BottomLeft,  uv.BottomLeft,  color));
+        _renderingApi.PushVertex(new Vertex(rect.TopLeft,     uv.TopLeft,     color));
+        
+        _renderingApi.PushIndex(start, 0);
+        _renderingApi.PushIndex(start, 1);
+        _renderingApi.PushIndex(start, 3);
+        _renderingApi.PushIndex(start, 1);
+        _renderingApi.PushIndex(start, 2);
+        _renderingApi.PushIndex(start, 3);
+    }    
+
+    private void AddQuadTriangleBatch(int start, Rect2 rect, Rect2 uv, Color color, Matrix4x4 matrix)
+    {
+        var matrixIndex = 0;
+        if (matrix != Matrix4x4.Identity)
+            matrixIndex = _renderingApi.PushMatrix(matrix);
+        
+        _renderingApi.PushVertex(new Vertex(rect.TopRight,    uv.TopRight,    color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.BottomRight, uv.BottomRight, color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.BottomLeft,  uv.BottomLeft,  color, matrixIndex));
+        _renderingApi.PushVertex(new Vertex(rect.TopLeft,     uv.TopLeft,     color, matrixIndex));
         
         _renderingApi.PushIndex(start, 0);
         _renderingApi.PushIndex(start, 1);

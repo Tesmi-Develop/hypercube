@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Text;
 using Hypercube.Core.Graphics.Rendering.Api.Handlers;
 using Hypercube.Core.Graphics.Rendering.Api.Realisations.OpenGl.Objects;
@@ -8,7 +9,6 @@ using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Core.Graphics.Utilities.Extensions;
 using Hypercube.Core.Resources;
 using Hypercube.Core.Viewports;
-using Hypercube.Core.Windowing;
 using Hypercube.Core.Windowing.Api;
 using Hypercube.Core.Windowing.Windows;
 using Hypercube.Mathematics.Matrices;
@@ -36,9 +36,10 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
     public event Action? OnBeforeBufferSwap;
     
     private ArrayObject _vao = null!;
+    
     private BufferObject _vbo = null!;
     private BufferObject _ebo = null!;
-
+    
     public GL Gl { get; private set; } = null!;
 
     protected override string InternalInfo
@@ -121,6 +122,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         Gl.Scissor(rect.Left, rect.Top, (uint) rect.Width, (uint) rect.Height);
     }
 
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
     protected override bool InternalInit(IContextInfoProvider contextInfoProvider)
     {
         Gl = GL.GetApi(contextInfoProvider.GetProcAddress);
@@ -136,11 +138,12 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         _vao = GenArrayObject("Main VAO");
         _vbo = GenBufferObject(BufferTargetARB.ArrayBuffer, "Main VBO");
         _ebo = GenBufferObject(BufferTargetARB.ElementArrayBuffer, "Main EBO");
-                
+        
         _vao.Bind();
+        
         _vbo.SetData(BatchVertices);
         _ebo.SetData(BatchIndices);
-
+        
         var pointer = nint.Zero;
         
         // aPos
@@ -170,6 +173,13 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         
         // aNormal offset
         pointer += 3 * sizeof(float);
+        
+        // aModelIndex
+        Gl.VertexAttribIPointer(4, 1, VertexAttribIType.Int, Vertex.Size, pointer);
+        Gl.EnableVertexAttribArray(4);
+        
+        // aModelIndex offset
+        pointer += 1 * sizeof(int);
         
         _vao.Unbind();
         _vbo.Unbind();
@@ -246,7 +256,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
             throw new Exception();
         
         shader.Use();
-        shader.SetUniform("model", Matrix4x4.Identity);
+        shader.SetUniform("models", BatchMatrices);
         shader.SetUniform("view", renderState.View);
         shader.SetUniform("projection", renderState.Projection);
 

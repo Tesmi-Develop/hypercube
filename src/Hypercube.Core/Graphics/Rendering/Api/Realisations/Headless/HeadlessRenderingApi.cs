@@ -63,6 +63,11 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     {
     }
 
+    public int PushMatrix(Matrix4x4 matrix)
+    {
+        return 0;
+    }
+
     public void PushVertex(Vertex vertex)
     {
     }
@@ -171,6 +176,10 @@ public sealed class HeadlessRenderingApi : IRenderingApi
         }
 
         public override void SetUniform(string name, Matrix4x4 value, bool transpose = false)
+        {
+        }
+
+        public override void SetUniform(string name, Matrix4x4[] value, bool transpose = false)
         {
         }
 
