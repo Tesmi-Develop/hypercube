@@ -5,4 +5,5 @@ public enum EntryPointStage
     BeforeInit,
     BeforeRenderInit,
     AfterInit,
+    BeforeEntityInitialization
 }

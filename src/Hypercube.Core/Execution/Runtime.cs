@@ -74,6 +74,8 @@ public sealed partial class Runtime
         
         _logger.Info("The entry points are called!");
         _logger.Info("Initialization of internal modules...");
+         
+        EntryPointsExecute(EntryPointStage.BeforeRenderInit);
 
         EntryPointsExecute(EntryPointStage.BeforeRenderInit); 
         
@@ -87,6 +89,7 @@ public sealed partial class Runtime
 
         InitDependentsDependencies();
 
+        EntryPointsExecute(EntryPointStage.BeforeEntityInitialization);
         _entitySystemManager.Initialize();
         
         _logger.Info("Preparation is complete, start the main application cycle");
