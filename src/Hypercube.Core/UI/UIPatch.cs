@@ -1,6 +1,7 @@
 ﻿using Hypercube.Core.Graphics.Patching;
 using Hypercube.Core.Graphics.Rendering;
 using Hypercube.Core.Graphics.Rendering.Context;
+using Hypercube.Core.UI.Manager;
 
 namespace Hypercube.Core.UI;
 
@@ -8,7 +9,7 @@ public sealed class UIPatch : Patch
 {
     private readonly UIManager _uiManager;
     
-    public override int Priority => 1000;
+    public override int Priority => -1000;
     
     public UIPatch(UIManager uiManager)
     {

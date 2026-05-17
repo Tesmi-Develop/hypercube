@@ -89,9 +89,11 @@ public partial interface IRenderContext
     void DrawTexture(Texture texture, Vector2 position, Angle rotation, Vector2 scale, Color color, Rect2 uv);
     
     void Scissor(bool value);
-    void Scissor(Rect2i rect);
+    void SetScissorRect(Rect2i rect);
 
+    IDisposable UseScissor(Rect2i rect);
+    
     IDisposable UseRenderState(Matrix4x4 view, Matrix4x4 projection);
-    IDisposable UseRenderState(ICameraManager cameraManager);
+    IDisposable UseRenderState(ICamera camera);
     IDisposable UseRenderState(IWindow window);
 }

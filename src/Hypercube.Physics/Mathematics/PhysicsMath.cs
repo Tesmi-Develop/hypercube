@@ -1,12 +1,22 @@
-﻿using Hypercube.Physics.Manifolds;
-using Hypercube.Physics.Shapes.Structs;
+﻿using Hypercube.Physics.Shapes.Structs;
 using JetBrains.Annotations;
 
-namespace Hypercube.Physics;
+namespace Hypercube.Physics.Mathematics;
 
 [PublicAPI]
 public static class PhysicsMath
 {
+    // TODO: Vector2.Normalized?
+    public static Vector2 Normalize(Vector2 vector)
+    {
+        var length = float.Sqrt(vector.X * vector.X + vector.Y * vector.Y);
+        if (length < Constants.Epsilon)
+            return Vector2.Zero;
+
+        var invLength = 1f / length;
+        return vector * invLength;
+    }
+    
     /// <summary>
     /// Half part of Separate Axis Theorem, checks only for polygon 1.
     /// </summary>

@@ -3,7 +3,7 @@ using Hypercube.Core.Resources;
 using Hypercube.Core.UI.Elements;
 using Hypercube.Utilities.Dependencies;
 
-namespace Hypercube.Core.UI;
+namespace Hypercube.Core.UI.Manager;
 
 public interface IUIManager
 {

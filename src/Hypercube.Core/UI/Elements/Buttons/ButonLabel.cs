@@ -11,13 +11,11 @@ public class ButonLabel : ButonRect
     {
         base.OnStartup();
         
-        Label = new Label
+        Label = AddChild(new Label
         {
             AnchorPoint = Vector2.Half,
             Position = HDim2.ScalarHalf,
             Size = HDim2.ScalarOne,
-        };
-
-        AddChild(Label);
+        });
     }
 }

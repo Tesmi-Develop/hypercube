@@ -1,4 +1,6 @@
-﻿namespace Hypercube.Physics.Shapes.Structs;
+﻿using Hypercube.Physics.Mathematics;
+
+namespace Hypercube.Physics.Shapes.Structs;
 
 public struct ShapeCircle
 {

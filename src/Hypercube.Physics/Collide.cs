@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Hypercube.Physics.Manifolds;
+using Hypercube.Physics.Mathematics;
 using Hypercube.Physics.Shapes.Structs;
 using Hypercube.Utilities.Collections;
 using JetBrains.Annotations;
@@ -9,11 +10,6 @@ namespace Hypercube.Physics;
 [PublicAPI]
 public static class Collide 
 {
-    public const float UnitsPerMeter = 1.0f;
-    public const float LinearSlop = 0.005f * UnitsPerMeter;
-    public const float SpeculativeDistance = 4.0f * LinearSlop;
-    public const float Epsilon = 1.1920929e-7f;
-    
     public static Manifold Circles(ref ShapeCircle circleA, Transform transformA, ref ShapeCircle circleB, Transform transformB)
     {
         var transform = transformA.ToLocalSpaceOf(transformB);
@@ -29,7 +25,7 @@ public static class Collide
         var radiusB = circleB.Radius;
         
         var separation = distance - radiusA - radiusB;
-        if (separation > SpeculativeDistance)
+        if (separation > Constants.SpeculativeDistance)
             return Manifold.Empty;
         
         var centerA = pointA + normal * radiusA;
@@ -89,12 +85,12 @@ public static class Collide
         
         var edgeA = 0;
         var separationA = PhysicsMath.ComputeMaxSeparation(ref edgeA, ref localA, ref localB);
-        if (separationA > SpeculativeDistance + radius)
+        if (separationA > Constants.SpeculativeDistance + radius)
             return Manifold.Empty;
 
         var edgeB = 0;
         var separationB = PhysicsMath.ComputeMaxSeparation(ref edgeB, ref localB, ref localA);
-        if (separationB > SpeculativeDistance + radius)
+        if (separationB > Constants.SpeculativeDistance + radius)
             return Manifold.Empty;
 
         var flip = separationA < separationB;
@@ -154,7 +150,7 @@ public static class Collide
             normalIndex = i;
         }
 
-        if (separation > SpeculativeDistance + radius)
+        if (separation > Constants.SpeculativeDistance + radius)
             return Manifold.Empty;
 
         var vertexIndex1 = normalIndex;
@@ -164,12 +160,12 @@ public static class Collide
         var vertex2 = vertices[vertexIndex2];
 
         var u1 = Vector2.Dot(center - vertex1, vertex2 - vertex1);
-        if (u1 < 0f && separation > Epsilon)
+        if (u1 < 0f && separation > Constants.Epsilon)
         {
-            var normal = Normalize(center - vertex1);
+            var normal = PhysicsMath.Normalize(center - vertex1);
 
             separation = Vector2.Dot(center - vertex1, normal);
-            if (separation > SpeculativeDistance + radius)
+            if (separation > Constants.SpeculativeDistance + radius)
                 return Manifold.Empty;
 
             var cA = vertex1 + radiusA * normal;
@@ -198,12 +194,12 @@ public static class Collide
         }
         
         var u2 = Vector2.Dot(center - vertex2, vertex1 - vertex2);
-        if (u2 < 0f && separation > Epsilon)
+        if (u2 < 0f && separation > Constants.Epsilon)
         {
-            var normal = Normalize(center - vertex2);
+            var normal = PhysicsMath.Normalize(center - vertex2);
 
             separation = Vector2.Dot(center - vertex2, normal);
-            if (separation > SpeculativeDistance + radius)
+            if (separation > Constants.SpeculativeDistance + radius)
                 return Manifold.Empty;
 
             var cA = vertex2 + radiusA * normal;
@@ -314,11 +310,11 @@ public static class Collide
             return Manifold.Empty;
 
         var vLower = v22;
-        if (lower2 < lower1 && upper2 - lower2 > Epsilon)
+        if (lower2 < lower1 && upper2 - lower2 > Constants.Epsilon)
             vLower = Vector2.Lerp(v22, v21, (lower1 - lower2) / (upper2 - lower2));
         
         var vUpper= v21;
-        if (upper2 > upper1 && upper2 - lower2 > Epsilon)
+        if (upper2 > upper1 && upper2 - lower2 > Constants.Epsilon)
             vUpper = Vector2.Lerp(v22, v21, (upper1 - lower2) / (upper2 - lower2));
   
 
@@ -371,19 +367,6 @@ public static class Collide
             }
         );
     }
-
-    private static Vector2 Normalize(Vector2 vector2)
-    {
-        var length = float.Sqrt(vector2.X * vector2.X + vector2.Y * vector2.Y);
-        if (length < Epsilon)
-            return Vector2.Zero;
-
-        var invLength = 1f / length;
-        return vector2 * invLength;
-    }
     
-    private static void Swap<T>(ref T lhs, ref T rhs) where T : struct
-    {
-        (lhs, rhs) = (rhs, lhs);
-    }
+
 }

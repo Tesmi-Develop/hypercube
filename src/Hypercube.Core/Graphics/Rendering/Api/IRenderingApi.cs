@@ -69,7 +69,7 @@ public interface IRenderingApi
     TextureHandle CreateTexture(int width, int height, int channels, byte[] data);
     void DeleteTexture(TextureHandle handle);
     
-    void SetScissor(bool value);
+    void Scissor(bool value);
     void SetScissorRect(Rect2i rect);
     
     void SetRenderState(Matrix4x4 view, Matrix4x4 projection);
@@ -81,10 +81,10 @@ public interface IRenderingApi
     /// <summary>
     /// Internal method to get render state by ID. Used by RenderContext.
     /// </summary>
-    Batching.RenderState GetRenderState(Batching.RenderStateId id);
+    RenderState GetRenderState(RenderStateId id);
     
     /// <summary>
     /// Internal method to get current render state ID. Used by RenderContext.
     /// </summary>
-    Batching.RenderStateId GetCurrentRenderStateId();
+    RenderStateId GetCurrentRenderStateId();
 }

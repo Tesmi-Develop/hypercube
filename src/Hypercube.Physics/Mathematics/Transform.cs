@@ -3,7 +3,7 @@ using Hypercube.Mathematics;
 using Hypercube.Physics.Shapes.Structs;
 using JetBrains.Annotations;
 
-namespace Hypercube.Physics;
+namespace Hypercube.Physics.Mathematics;
 
 [PublicAPI]
 public readonly struct Transform

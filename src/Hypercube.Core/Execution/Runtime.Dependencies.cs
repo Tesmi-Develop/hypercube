@@ -10,6 +10,7 @@ using Hypercube.Core.Input.Handler;
 using Hypercube.Core.Input.Manager;
 using Hypercube.Core.Resources;
 using Hypercube.Core.UI;
+using Hypercube.Core.UI.Manager;
 using Hypercube.Core.Viewports;
 using Hypercube.Core.Windowing.Manager;
 using Hypercube.Utilities.Configuration;

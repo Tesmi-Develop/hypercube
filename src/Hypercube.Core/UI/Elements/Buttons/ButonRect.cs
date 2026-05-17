@@ -11,12 +11,10 @@ public class ButonRect : Button
     {
         base.OnStartup();
         
-        Fill = new Rectangle
+        Fill = AddChild(new Rectangle
         {
             Position = HDim2.Zero,
             Size = HDim2.ScalarOne,
-        };
-
-        AddChild(Fill);
+        });
     }
 }

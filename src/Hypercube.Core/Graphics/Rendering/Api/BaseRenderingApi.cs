@@ -136,7 +136,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         return InternalCreateShaderProgram(shaders);
     }
 
-    public abstract void SetScissor(bool value);
+    public abstract void Scissor(bool value);
     public abstract void SetScissorRect(Rect2i rect);
 
     protected void UpdateBatchCount()

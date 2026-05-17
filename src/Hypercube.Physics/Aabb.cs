@@ -1,5 +1,8 @@
-﻿namespace Hypercube.Physics;
+﻿using System.Runtime.InteropServices;
 
+namespace Hypercube.Physics;
+
+[StructLayout(LayoutKind.Sequential)]
 public struct Aabb
 {
     public Vector2 Point1;

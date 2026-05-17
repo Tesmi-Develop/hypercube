@@ -2,14 +2,14 @@
 using Hypercube.Physics.Shapes;
 using Hypercube.Physics.Shapes.Structs;
 
-namespace Hypercube.Physics;
+namespace Hypercube.Physics.Utilities;
 
 public static class DebugPhysicsGuard
 {
     [Conditional("DEBUG")]
     public static void ValidateShapeType(ShapeType type)
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan((int) type, (int) ShapeType.Segment);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((int) type, Constants.ShapeTypeCount);
         ArgumentOutOfRangeException.ThrowIfLessThan((int) type, 0);
     }
     

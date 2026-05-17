@@ -32,24 +32,6 @@ public readonly struct ManifoldPoint
         
         Persisted = false;
     }
-    
-    
-    public ManifoldPoint(Vector2 point, Vector2 anchorA, Vector2 anchorB, float separation, float normalImpulse, float tangentImpulse, float totalNormalImpulse, float normalVelocity, ushort id, bool persisted)
-    {
-        Point = point;
-        AnchorA = anchorA;
-        AnchorB = anchorB;
-        
-        Separation = separation;
-        NormalImpulse = normalImpulse;
-        TangentImpulse = tangentImpulse;
-        TotalNormalImpulse = totalNormalImpulse;
-        NormalVelocity = normalVelocity;
-        
-        Id = id;
-        
-        Persisted = persisted;
-    }
-    
+
     public static ushort MakeId(int a, int b) => (ushort) ((byte) a << 8 | (byte) b);
 }

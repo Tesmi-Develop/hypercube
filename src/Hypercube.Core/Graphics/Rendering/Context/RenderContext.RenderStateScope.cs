@@ -16,16 +16,14 @@ public partial class RenderContext
         return UseRenderState(view, projection);
     }
 
-    public IDisposable UseRenderState(ICameraManager cameraManager)
+    public IDisposable UseRenderState(ICamera camera)
     {
-        var view = cameraManager.MainCamera.View;
-        var projection = cameraManager.MainCamera.Projection;
+        var view = camera.View;
+        var projection = camera.Projection;
         
         return UseRenderState(view, projection);
     }
 
-    public IDisposable UseRenderState(Matrix4x4 view, Matrix4x4 projection)
-    {
-        return new RenderStateScope(_renderingApi, this, view, projection);
-    }
+    public IDisposable UseRenderState(Matrix4x4 view, Matrix4x4 projection) =>
+        new RenderStateScope(_renderingApi, this, view, projection);
 }

@@ -16,13 +16,7 @@ public partial class RenderContext : IRenderContext
         _windowingApi = windowingApi;
     }
 
-    public void Scissor(bool value)
-    {
-        _renderingApi.SetScissor(value);
-    }
+    public void Scissor(bool value) => _renderingApi.Scissor(value);
 
-    public void Scissor(Rect2i rect)
-    {
-        _renderingApi.SetScissorRect(rect);
-    }
+    public void SetScissorRect(Rect2i rect) => _renderingApi.SetScissorRect(rect);
 }

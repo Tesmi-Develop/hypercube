@@ -1,4 +1,6 @@
 ﻿using Hypercube.Mathematics;
+using Hypercube.Physics.Mathematics;
+using Hypercube.Physics.Utilities;
 using Hypercube.Utilities.Collections;
 
 namespace Hypercube.Physics.Shapes.Structs;

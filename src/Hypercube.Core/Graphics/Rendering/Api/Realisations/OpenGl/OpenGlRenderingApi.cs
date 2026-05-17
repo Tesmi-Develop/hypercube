@@ -111,14 +111,14 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         Gl.DeleteTexture(handle);
     }
 
-    public override void SetScissor(bool value)
+    public override void Scissor(bool value)
     {
         Gl.SetScissor(value);
     }
 
     public override void SetScissorRect(Rect2i rect)
     {
-        Gl.Scissor(rect.Left, rect.Top, (uint) rect.Width, (uint) rect.Height);
+        Gl.Scissor(rect.Left, rect.Bottom, (uint) rect.Width, (uint) rect.Height);
     }
 
     protected override bool InternalInit(IContextInfoProvider contextInfoProvider)

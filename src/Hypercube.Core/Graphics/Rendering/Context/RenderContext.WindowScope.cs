@@ -5,10 +5,7 @@ namespace Hypercube.Core.Graphics.Rendering.Context;
 
 public partial class RenderContext
 {
-    public IDisposable UseContextScope(IWindow window)
-    {
-        return new WindowScope(this, window.Handle);
-    }
+    public IDisposable UseContextScope(IWindow window) => new WindowScope(this, window.Handle);
     
     public readonly struct WindowScope : IDisposable
     {

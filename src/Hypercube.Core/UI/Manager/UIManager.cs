@@ -6,10 +6,10 @@ using Hypercube.Core.UI.Elements;
 using Hypercube.Core.Viewports;
 using Hypercube.Core.Windowing.Manager;
 using Hypercube.Mathematics.Dimensions;
-using Hypercube.Utilities.Dependencies;
 using Hypercube.Utilities.Debugging.Logger;
+using Hypercube.Utilities.Dependencies;
 
-namespace Hypercube.Core.UI;
+namespace Hypercube.Core.UI.Manager;
 
 public sealed class UIManager : IUIManager, IPostInject
 {

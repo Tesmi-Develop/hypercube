@@ -89,7 +89,7 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     {
     }
 
-    public void SetScissor(bool value)
+    public void Scissor(bool value)
     {
     }
 
