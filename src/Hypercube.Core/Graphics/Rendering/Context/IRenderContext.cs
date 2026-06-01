@@ -1,4 +1,5 @@
 ﻿using Hypercube.Core.Graphics.Rendering.Api;
+using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Core.Graphics.Resources;
 using Hypercube.Core.Viewports;
 using Hypercube.Core.Windowing.Api;
@@ -23,6 +24,11 @@ public partial interface IRenderContext
     /// <param name="windowingApi">An instance of the windowing API providing low-level window manager functionality.</param>
     void Init(IRenderingApi renderingApi, IWindowingApi windowingApi);
 
+    void SetBlendMode(BlendMode mode);
+    void SetShader(IShaderProgram shader);
+    void ClearShader();
+    void DrawSurface(Surface surface, Color color);
+    
     /// <summary>
     /// Draws a 3D model at a given position, with rotation, scale, and optional texture override.
     /// </summary>
@@ -44,13 +50,14 @@ public partial interface IRenderContext
     /// <param name="scale">The scale factor for the text.</param>
     /// <param name="align"></param>
     void DrawText(string text, Font font, Vector2 position, Color color, float scale = 1f, Vector2 align = default);
-    
+
     /// <summary>
     /// Draws a rectangle on the screen.
     /// </summary>
     /// <param name="box">The bounding box of the rectangle.</param>
     /// <param name="color">The color to use for the rectangle.</param>
     /// <param name="outline">Whether to draw only the outline (true) or fill the rectangle (false).</param>
+    /// <param name="shader"></param>
     void DrawRectangle(Rect2 box, Color color, bool outline = false);
 
     /// <summary>
@@ -95,5 +102,10 @@ public partial interface IRenderContext
     
     IDisposable UseRenderState(Matrix4x4 view, Matrix4x4 projection);
     IDisposable UseRenderState(ICamera camera);
+    IDisposable UseRenderState(Surface surface);
     IDisposable UseRenderState(IWindow window);
+    
+    Surface CreateSurface(Vector2i size);
+    void BindSurface(Surface surface);
+    void UnbindSurface();
 }

@@ -43,7 +43,7 @@ public interface IRenderingApi
     /// note that for this to work, all current parameters must match a past call to <see cref="EnsureBatch"/>.
     /// Use this instead of directly adding the batches, and it will probably reduce their number.
     /// </summary>
-    void EnsureBatch(PrimitiveTopology topology, uint shader, uint? texture);
+    void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture);
     
     /// <summary>
     /// In case we need to get current batch, or start new one
@@ -53,6 +53,9 @@ public interface IRenderingApi
     void PushVertex(Vertex vertex);
     void PushIndex(uint start, uint offset);
     void PushIndex(int start, int index);
+    Surface CreateSurface(Vector2i size);
+    void BindSurface(Surface surface);
+    void UnbindSurface();
     
     /// <summary>
     /// Creates a shader program from a single source file.
@@ -71,9 +74,11 @@ public interface IRenderingApi
     void Scissor(bool value);
     void SetScissorRect(Rect2i rect);
     
-    void SetRenderState(Matrix4x4 view, Matrix4x4 projection);
-    void SetRenderState(ICameraManager cameraManager);
+    void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha);
+    void SetRenderState(ICameraManager cameraManager, BlendMode blendMode = BlendMode.Alpha);
     void SetRenderView(Matrix4x4 view);
+    void SetRenderViewProjection(Matrix4x4 view, Matrix4x4 projection);
+    void SetRenderBlendMode(BlendMode blendMode);
     void SetRenderProjection(Matrix4x4 projection);
     RenderState GetCurrentRenderState();
     

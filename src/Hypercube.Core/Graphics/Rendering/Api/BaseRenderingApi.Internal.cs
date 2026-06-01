@@ -14,6 +14,7 @@ public abstract partial class BaseRenderingApi
     protected abstract bool InternalInit(IContextInfoProvider contextInfoProvider);
     protected abstract void InternalLoad();
     protected abstract void InternalTerminate();
+    public abstract Surface CreateSurface(Vector2i size);
 
     protected abstract IShader InternalCreateShader(string source, ShaderType type);
     protected abstract IShaderProgram InternalCreateShaderProgram(IEnumerable<IShader> shaders);

@@ -1,4 +1,5 @@
-﻿using Hypercube.Core.Graphics.Rendering.Batching;
+﻿using Hypercube.Core.Graphics.Rendering.Api;
+using Hypercube.Core.Graphics.Rendering.Batching;
 using Hypercube.Core.Graphics.Resources;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Matrices;
@@ -18,7 +19,7 @@ public sealed partial class RenderContext
         if (texture is not null && texture.Gpu is null)
             texture.GpuBind(_renderingApi);
         
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, shader.Handle, texture?.Gpu?.Handle);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, shader, texture?.Gpu?.Handle);
 
         var start = _renderingApi.BatchVerticesIndex;
         var matrix = Matrix4x4.CreateTransformSRT(position, rotation, scale);
@@ -85,16 +86,42 @@ public sealed partial class RenderContext
             (Vector3) scale
         );
         
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram.Handle, texture.Gpu?.Handle);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.TexturingShaderProgram, texture.Gpu?.Handle);
         AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, rect * matrix, uv, color);
+    }
+    
+    public void DrawSurface(Surface surface, Color color)
+    {
+        if (_renderingApi.TexturingShaderProgram is null)
+            throw new Exception();
+        
+        var flippedUv = new Rect2(new Vector2(0, 1), new Vector2(1, 0));
+        var position = Vector2.Zero;
+        
+        var rect = new Rect4(
+            new Vector2(0, 0),
+            new Vector2(surface.Size.X, 0),
+            new Vector2(surface.Size.X, surface.Size.Y),
+            new Vector2(0, surface.Size.Y)
+        );
+        
+        var matrix = Matrix4x4.CreateTransformSRT(
+            (Vector3) position,
+            Quaternion.FromEulerZ((float) Angle.Zero),
+            Vector3.One
+        );
+        
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.TexturingShaderProgram, surface.FboTextureHandle);
+        AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, rect, Rect2.UV, color);
     }
     
     public void DrawRectangle(Rect2 box, Color color, bool outline = false)
     {
         if (_renderingApi.PrimitiveShaderProgram is null)
             throw new Exception();
-        
-        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
+
+        var shader = _shaderProgram ?? _renderingApi.PrimitiveShaderProgram;
+        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, shader, null);
         
         if (outline)
         {
@@ -113,7 +140,7 @@ public sealed partial class RenderContext
         var direction = (end - start).Normalized;
         var normal = new Vector2(-direction.Y, direction.X) * thickness / 2f;
 
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.PrimitiveShaderProgram, null);
 
         var startIndex = _renderingApi.BatchVerticesIndex;
         
@@ -135,7 +162,7 @@ public sealed partial class RenderContext
         if (_renderingApi.PrimitiveShaderProgram is null)
             throw new InvalidOperationException("Primitive shader program is not initialized");
         
-        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _renderingApi.PrimitiveShaderProgram.Handle, null);
+        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.PrimitiveShaderProgram, null);
         
         var startIndex = _renderingApi.BatchVerticesIndex;
         

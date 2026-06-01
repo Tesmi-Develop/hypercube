@@ -36,6 +36,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     
     private BatchData? _currentBatchData;
     private readonly List<RenderState> _renderStates = [];
+    protected IReadOnlyList<RenderState> RenderStates => _renderStates;
     private RenderStateId _currentRenderStateId;
 
     protected Color ClearColor { get; private set; }
@@ -50,7 +51,6 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         BatchIndices = new uint[settings.MaxIndices];
         WindowingApi = windowingApi;
         
-        // Инициализируем дефолтным состоянием
         _renderStates.Add(RenderState.Default);
         _currentRenderStateId = new RenderStateId(0);
     }
@@ -75,12 +75,12 @@ public abstract partial class BaseRenderingApi : IRenderingApi
 
     public abstract void Render(IWindow window);
 
-    public void EnsureBatch(PrimitiveTopology topology, uint shader, uint? texture)
+    public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture)
     {
         EnsureBatch(topology, shader, texture, _currentRenderStateId);
     }
     
-    public void EnsureBatch(PrimitiveTopology topology, uint shader, uint? texture, RenderStateId renderStateId)
+    public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture, RenderStateId renderStateId)
     {
         if (_currentBatchData is not null)
         {
@@ -121,7 +121,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     {
         PushIndex((uint) start, (uint) index);
     }
-    
+
     public IShaderProgram CreateShaderProgram(string source)
     {
         var sections = RenderingApiShaderLoader.ParseSections(source);
@@ -173,6 +173,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
             data.Start,
             currentIndex - data.Start,
             data.Texture,
+            data.Shader,
             data.PrimitiveTopology,
             Matrix4x4.Identity,
             WindowingApi.Context,
@@ -189,9 +190,9 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         return id;
     }
     
-    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection)
+    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha)
     {
-        var newState = new RenderState(view, projection);
+        var newState = new RenderState(view, projection, blendMode, surface);
         
         var existingId = _renderStates.IndexOf(newState);
         if (existingId >= 0)
@@ -201,13 +202,12 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         }
         
         _renderStates.Add(newState);
-        
         _currentRenderStateId = new RenderStateId(_renderStates.Count - 1);
     }
     
-    public void SetRenderState(ICameraManager cameraManager)
+    public void SetRenderState(ICameraManager cameraManager, BlendMode blendMode = BlendMode.Alpha)
     {
-        SetRenderState(cameraManager.MainCamera.View, cameraManager.MainCamera.Projection);
+        SetRenderState(cameraManager.MainCamera.View, cameraManager.MainCamera.Projection, null, blendMode);
     }
     
     public RenderState GetRenderState(RenderStateId id)
@@ -228,12 +228,39 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     public void SetRenderView(Matrix4x4 view)
     {
         var currentState = GetCurrentRenderState();
-        SetRenderState(view, currentState.Projection);
+        SetRenderState(view, currentState.Projection, currentState.Surface, currentState.BlendMode);
+    }
+
+    public void SetRenderViewProjection(Matrix4x4 view, Matrix4x4 projection)
+    {
+        var currentState = GetCurrentRenderState();
+        SetRenderState(view, projection, currentState.Surface, currentState.BlendMode);
     }
     
     public void SetRenderProjection(Matrix4x4 projection)
     {
         var currentState = GetCurrentRenderState();
-        SetRenderState(currentState.View, projection);
+        SetRenderState(currentState.View, projection, currentState.Surface, currentState.BlendMode);
+    }
+    
+    public void SetRenderBlendMode(BlendMode blendMode)
+    {
+        var currentState = GetCurrentRenderState();
+        if (currentState.BlendMode == blendMode)
+            return;
+        
+        SetRenderState(currentState.View, currentState.Projection, currentState.Surface, blendMode);
+    }
+
+    public void BindSurface(Surface surface)
+    {
+        var currentState = GetCurrentRenderState();
+        SetRenderState(currentState.View, currentState.Projection, surface, currentState.BlendMode);
+    }
+
+    public void UnbindSurface()
+    {
+        var currentState = GetCurrentRenderState();
+        SetRenderState(currentState.View, currentState.Projection, null, currentState.BlendMode);
     }
 }

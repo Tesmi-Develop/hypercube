@@ -46,8 +46,8 @@ public sealed class PreloadContext
                 
                     _manager.Load(path, type);
 
-                    loaded++;
-                    progress?.Report(new PreloadProgress(loaded, total, path));
+                    //loaded++;
+                    //progress?.Report(new PreloadProgress(loaded, total, path));
                 }
                 catch (Exception ex)
                 {

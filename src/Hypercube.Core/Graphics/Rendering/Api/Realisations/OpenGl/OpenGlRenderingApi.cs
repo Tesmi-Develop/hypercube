@@ -10,6 +10,7 @@ using Hypercube.Core.Resources;
 using Hypercube.Core.Viewports;
 using Hypercube.Core.Windowing.Api;
 using Hypercube.Core.Windowing.Windows;
+using Hypercube.Mathematics;
 using Hypercube.Mathematics.Matrices;
 using Hypercube.Mathematics.Shapes;
 using Hypercube.Utilities.Dependencies;
@@ -120,22 +121,8 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         Gl.Scissor(rect.Left, rect.Bottom, (uint) rect.Width, (uint) rect.Height);
     }
 
-    protected override bool InternalInit(IContextInfoProvider contextInfoProvider)
+    private void BindObjects()
     {
-        Gl = GL.GetApi(contextInfoProvider.GetProcAddress);
-
-        if (Gl.HasErrors())
-            return false;
-
-        Gl.DebugMessageCallback(DebugProcCallback, in nint.Zero);
-        
-        Gl.Enable(EnableCap.DebugOutput);
-        Gl.Enable(EnableCap.DebugOutputSynchronous);
-        
-        _vao = GenArrayObject("Main VAO");
-        _vbo = GenBufferObject(BufferTargetARB.ArrayBuffer, "Main VBO");
-        _ebo = GenBufferObject(BufferTargetARB.ElementArrayBuffer, "Main EBO");
-                
         _vao.Bind();
         _vbo.SetData(BatchVertices);
         _ebo.SetData(BatchIndices);
@@ -173,6 +160,25 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         _vao.Unbind();
         _vbo.Unbind();
         _ebo.Unbind();
+    }
+
+    protected override bool InternalInit(IContextInfoProvider contextInfoProvider)
+    {
+        Gl = GL.GetApi(contextInfoProvider.GetProcAddress);
+
+        if (Gl.HasErrors())
+            return false;
+
+        Gl.DebugMessageCallback(DebugProcCallback, in nint.Zero);
+        
+        Gl.Enable(EnableCap.DebugOutput);
+        Gl.Enable(EnableCap.DebugOutputSynchronous);
+        
+        _vao = GenArrayObject("Main VAO");
+        _vbo = GenBufferObject(BufferTargetARB.ArrayBuffer, "Main VBO");
+        _ebo = GenBufferObject(BufferTargetARB.ElementArrayBuffer, "Main EBO");
+
+        BindObjects();
         
         return true;
     }
@@ -189,11 +195,47 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         _vbo.Delete();
         _ebo.Delete();
     }
+    
+    public void BindFramebuffer(uint fbo)
+    {
+        Gl.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+    }
+    
+    public void UnbindFramebuffer()
+    {
+        Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+    }
+    
+    public override unsafe Surface CreateSurface(Vector2i size)
+    {
+        var textureHandle = Gl.GenTexture();
+        
+        Gl.BindTexture(TextureTarget.Texture2D, textureHandle);
+        
+        Gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint) size.X, (uint) size.Y, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
+        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.ClampToEdge);
+        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.ClampToEdge);
+        
+        var fboHandle = Gl.GenFramebuffer();
+        Gl.BindFramebuffer(FramebufferTarget.Framebuffer, fboHandle);
+        Gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, textureHandle, 0);
+
+        BindObjects();
+        
+        if (Gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
+            throw new Exception("FBO incomplete");
+        
+        Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        
+        return new Surface(fboHandle, textureHandle, size);
+    }
 
     public override void Render(IWindow window)
     {
         Clear();
-
+        
         Gl.Viewport(window);
         Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
@@ -201,6 +243,20 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         
         OnDraw?.Invoke(new DrawPayload(window, _cameraManager.MainCamera));
 
+        foreach (var state in RenderStates)
+        {
+            if (!state.Surface.HasValue)
+                continue;
+            
+            var surface = state.Surface.Value;
+            Gl.BindFramebuffer(FramebufferTarget.Framebuffer, surface.Fbo);
+            Gl.Viewport(surface.Size);
+            Gl.ClearColor(0, 0, 0, 1);
+            Gl.Clear(ClearBufferMask.ColorBufferBit);
+            Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            Gl.Viewport(window);
+        }
+        
         BreakCurrentBatch();
         UpdateBatchCount();
 
@@ -218,7 +274,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         _ebo.SetData(BatchIndices);
         
         foreach (var batch in Batches)
-            Render(batch);
+            Render(batch, window);
         
         _vao.Unbind();
         _vbo.Unbind();
@@ -228,17 +284,53 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         
         window.SwapBuffers();
     }
+    
+    private void ApplyBlendState(BlendMode mode)
+    {
+        Gl.Enable(EnableCap.Blend);
+    
+        switch (mode)
+        {
+            case BlendMode.Additive:
+                Gl.BlendEquation(BlendEquationModeEXT.FuncAdd);
+                Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
+                break;
 
-    private void Render(Batch batch)
+            case BlendMode.Multiply:
+                Gl.BlendEquation(BlendEquationModeEXT.FuncAdd);
+                Gl.BlendFunc(BlendingFactor.DstColor, BlendingFactor.Zero);
+                break;
+            case BlendMode.Subtractive:
+                Gl.BlendEquation(BlendEquationModeEXT.FuncReverseSubtract);
+                Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
+                break;
+
+            case BlendMode.Alpha:
+            default:
+                Gl.BlendEquation(BlendEquationModeEXT.FuncAdd);
+                Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                break;
+        }
+    }
+
+    private void Render(Batch batch, IWindow window)
     {
         var renderState = GetRenderState(batch.RenderStateId);
-        var shader = PrimitiveShaderProgram;
+        var shader = batch.Shader;
 
+        if (renderState.Surface.HasValue)
+        {
+            var surface = renderState.Surface.Value;
+            Gl.BindFramebuffer(FramebufferTarget.Framebuffer, surface.Fbo);
+            Gl.Viewport(surface.Size);
+        }
+        
+        ApplyBlendState(renderState.BlendMode);
+        
         if (batch.TextureHandle is not null)
         {
             Gl.ActiveTexture(TextureUnit.Texture0);
             Gl.BindTexture(TextureTarget.Texture2D, batch.TextureHandle.Value);
-            shader = TexturingShaderProgram;
         }
         
         if (shader is null)
@@ -254,6 +346,8 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         shader.Stop();
         
         Gl.BindTexture(TextureTarget.Texture2D, 0);
+        Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        Gl.Viewport(window);
     }
 
     protected override IShader InternalCreateShader(string source, ShaderType type)

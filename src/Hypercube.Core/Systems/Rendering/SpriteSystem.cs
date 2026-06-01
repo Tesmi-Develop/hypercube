@@ -38,6 +38,9 @@ public sealed class SpriteSystem : PatchEntitySystem
             return;
         }
 
+        if (string.IsNullOrEmpty(component.Path))
+            return;
+        
         component.Texture = _resource.Load<Texture>(component.Path);
         
         if (component.Texture.Gpu is null)

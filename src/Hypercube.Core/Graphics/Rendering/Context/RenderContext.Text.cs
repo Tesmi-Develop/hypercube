@@ -27,7 +27,7 @@ public partial class RenderContext
         );
 
         // Using a texture shader and font as a texture
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram.Handle, font.Texture.Gpu?.Handle);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram, font.Texture.Gpu?.Handle);
 
         foreach (var c in text)
         {

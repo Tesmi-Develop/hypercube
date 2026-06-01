@@ -54,7 +54,7 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     {
     }
 
-    public void EnsureBatch(PrimitiveTopology topology, uint shader, uint? texture)
+    public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture)
     {
     }
 
@@ -72,6 +72,26 @@ public sealed class HeadlessRenderingApi : IRenderingApi
 
     public void PushIndex(int start, int index)
     {
+    }
+
+    public Surface CreateSurface(Vector2i size)
+    {
+        return default;
+    }
+
+    public Surface CreateSurface(int width, int height)
+    {
+        return new Surface(default, default, default);
+    }
+
+    public void BindSurface(Surface surface)
+    {
+        
+    }
+
+    public void UnbindSurface()
+    {
+        
     }
 
     public IShaderProgram CreateShaderProgram(string source)
@@ -96,31 +116,46 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     {
     }
 
-    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection)
+    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha)
+    {
+        
+    }
+
+    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, BlendMode blendMode = BlendMode.Alpha)
     {
     }
 
-    public void SetRenderState(ICameraManager cameraManager)
+    public void SetRenderState(ICameraManager cameraManager, BlendMode blendMode = BlendMode.Alpha)
     {
     }
 
-    public Batching.RenderState GetRenderState(Batching.RenderStateId id)
+    public RenderState GetRenderState(RenderStateId id)
     {
-        return Batching.RenderState.Default;
+        return RenderState.Default;
     }
 
-    public Batching.RenderStateId GetCurrentRenderStateId()
+    public RenderStateId GetCurrentRenderStateId()
     {
-        return new Batching.RenderStateId(0);
+        return new RenderStateId(0);
     }
 
-    public Batching.RenderState GetCurrentRenderState()
+    public RenderState GetCurrentRenderState()
     {
-        return Batching.RenderState.Default;
+        return RenderState.Default;
     }
 
     public void SetRenderView(Matrix4x4 view)
     {
+    }
+
+    public void SetRenderViewProjection(Matrix4x4 view, Matrix4x4 projection)
+    {
+        
+    }
+
+    public void SetRenderBlendMode(BlendMode blendMode)
+    {
+        
     }
 
     public void SetRenderProjection(Matrix4x4 projection)

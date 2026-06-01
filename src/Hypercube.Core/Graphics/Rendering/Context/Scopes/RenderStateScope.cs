@@ -17,12 +17,12 @@ public readonly struct RenderStateScope : IDisposable
         _context = context;
         
         _previousRenderStateId = _api.GetCurrentRenderStateId();
-        _api.SetRenderState(view, projection);
+        _api.SetRenderViewProjection(view, projection);
     }
 
     public void Dispose()
     {
         var previousState = _api.GetRenderState(_previousRenderStateId);
-        _api.SetRenderState(previousState.View, previousState.Projection);
+        _api.SetRenderViewProjection(previousState.View, previousState.Projection);
     }
 }

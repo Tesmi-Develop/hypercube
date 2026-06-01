@@ -1,3 +1,4 @@
+using Hypercube.Core.Graphics.Rendering.Api;
 using Hypercube.Core.Graphics.Rendering.Context.Scopes;
 using Hypercube.Core.Viewports;
 using Hypercube.Core.Windowing.Windows;
@@ -12,6 +13,18 @@ public partial class RenderContext
     {
         var view = Matrix4x4.CreateTransformSRT(new Vector3(-window.Size.X, -window.Size.Y, 0) / 2f, Quaternion.Identity, Vector3.One);
         var projection = Matrix4x4.CreateOrthographic(window.Size, -1, 1);
+        
+        return UseRenderState(view, projection);
+    }
+
+    public IDisposable UseRenderState(Surface surface)
+    {
+        var view = Matrix4x4.CreateScale(1, -1, 1) * Matrix4x4.CreateTranslation(0, surface.Size.Y);
+        var projection = Matrix4x4.CreateOrthographicOffCenter(
+            0, surface.Size.X, 
+            0, surface.Size.Y, 
+            -1, 1
+        );
         
         return UseRenderState(view, projection);
     }
