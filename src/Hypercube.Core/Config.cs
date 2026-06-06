@@ -42,7 +42,7 @@ public static class Config
     //     new("RenderingClearColor", Color.Black);
     
     public static readonly ConfigField<int> RenderingMaxVertices =
-        new("RenderingMaxVertices", 65532);    
+        new("RenderingMaxVertices", 65532 * 2);    
     
     public static readonly ConfigField<int> RenderingIndicesPerVertex =
         new("RenderingIndicesPerVertex", 6);

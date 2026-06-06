@@ -24,7 +24,7 @@ public readonly struct RenderState : IEquatable<RenderState>
         => View.Equals(other.View) && 
            Projection.Equals(other.Projection) &&
            BlendMode.Equals(other.BlendMode) &&
-           Surface == other.Surface;
+           Surface.Equals(other.Surface);
 
     public override bool Equals(object? obj)
         => obj is RenderState other &&

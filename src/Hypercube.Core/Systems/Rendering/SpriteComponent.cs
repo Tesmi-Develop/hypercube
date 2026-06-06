@@ -1,4 +1,5 @@
-﻿using Hypercube.Core.Graphics.Resources;
+﻿using Hypercube.Core.Graphics.Rendering.Shaders;
+using Hypercube.Core.Graphics.Resources;
 using Hypercube.Core.Resources;
 using Hypercube.Ecs.Components;
 using Hypercube.Mathematics;
@@ -16,4 +17,5 @@ public struct SpriteComponent() : IComponent
     public Vector2 Offset = Vector2.Zero;
     public Color Color = Color.White;
     public Rect2 Uv = Rect2.UV;
+    public IShaderProgram? Shader  = null;
 }

@@ -251,7 +251,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
             var surface = state.Surface.Value;
             Gl.BindFramebuffer(FramebufferTarget.Framebuffer, surface.Fbo);
             Gl.Viewport(surface.Size);
-            Gl.ClearColor(0, 0, 0, 1);
+            Gl.ClearColor(surface.Color.NormalizedR, surface.Color.NormalizedG, surface.Color.NormalizedB, surface.Color.NormalizedA);
             Gl.Clear(ClearBufferMask.ColorBufferBit);
             Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             Gl.Viewport(window);
