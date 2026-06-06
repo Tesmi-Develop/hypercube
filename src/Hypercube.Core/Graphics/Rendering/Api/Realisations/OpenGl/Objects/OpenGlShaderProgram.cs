@@ -114,7 +114,7 @@ public sealed class OpenGlShaderProgram : BaseShaderProgram
 
     public override void SetUniform(string name, Color value)
     {
-        _gl.Uniform4(_uniformLocations[name], value.R, value.G, value.B, value.A);
+        _gl.Uniform4(_uniformLocations[name], value.NormalizedR, value.NormalizedG, value.NormalizedB, value.NormalizedA);
     }
 
     protected override void InternalUseProgram(ShaderProgramHandle handle)
