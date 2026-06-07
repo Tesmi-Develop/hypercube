@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Hypercube.Core.Graphics.Rendering.Api;
 using Hypercube.Core.Graphics.Rendering.Shaders;
 
 namespace Hypercube.Core.Graphics.Rendering.Batching;
@@ -8,23 +9,23 @@ public readonly struct BatchData : IEquatable<BatchData>
 {
     public readonly int Start;
     public readonly uint? Texture;
-    public readonly IShaderProgram Shader;
+    public readonly ShaderSetup ShaderSetup;
     public readonly PrimitiveTopology PrimitiveTopology;
     public readonly RenderStateId RenderStateId;
 
-    public BatchData(int start, uint? texture, IShaderProgram shader, PrimitiveTopology primitiveTopology, RenderStateId renderStateId)
+    public BatchData(int start, uint? texture, ShaderSetup shaderSetup, PrimitiveTopology primitiveTopology, RenderStateId renderStateId)
     {
         Start = start;
         Texture = texture;
-        Shader = shader;
+        ShaderSetup = shaderSetup;
         PrimitiveTopology = primitiveTopology;
         RenderStateId = renderStateId;
     }
     
-    public bool Equals(PrimitiveTopology topology, uint? texture, IShaderProgram shader, RenderStateId renderStateId)
+    public bool Equals(PrimitiveTopology topology, uint? texture, ShaderSetup shaderSetup, RenderStateId renderStateId)
     {
         return Texture == texture &&
-               Shader.Handle == shader.Handle &&
+               ShaderSetup.ShaderProgram.Handle == shaderSetup.ShaderProgram.Handle &&
                PrimitiveTopology == topology &&
                RenderStateId == renderStateId;
     }
@@ -33,7 +34,7 @@ public readonly struct BatchData : IEquatable<BatchData>
     {
         return Start == other.Start &&
                Texture == other.Texture &&
-               Shader.Handle == other.Shader.Handle &&
+               ShaderSetup.ShaderProgram.Handle == other.ShaderSetup.ShaderProgram.Handle &&
                PrimitiveTopology == other.PrimitiveTopology &&
                RenderStateId == other.RenderStateId;
     }
@@ -45,7 +46,7 @@ public readonly struct BatchData : IEquatable<BatchData>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Start, Texture, Shader, (int)PrimitiveTopology, RenderStateId);
+        return HashCode.Combine(Start, Texture, ShaderSetup, (int)PrimitiveTopology, RenderStateId);
     }
     
     public static bool operator ==(BatchData a, BatchData b)

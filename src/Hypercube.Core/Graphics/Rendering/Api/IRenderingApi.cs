@@ -43,7 +43,7 @@ public interface IRenderingApi
     /// note that for this to work, all current parameters must match a past call to <see cref="EnsureBatch"/>.
     /// Use this instead of directly adding the batches, and it will probably reduce their number.
     /// </summary>
-    void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture);
+    void EnsureBatch(PrimitiveTopology topology, ShaderSetup shaderSetup, uint? texture);
     
     /// <summary>
     /// In case we need to get current batch, or start new one
@@ -74,8 +74,8 @@ public interface IRenderingApi
     void Scissor(bool value);
     void SetScissorRect(Rect2i rect);
     
-    void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha);
-    void SetRenderState(ICameraManager cameraManager, BlendMode blendMode = BlendMode.Alpha);
+    void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode);
+    void SetRenderState(ICameraManager cameraManager, BlendMode blendMode);
     void SetRenderView(Matrix4x4 view);
     void SetRenderViewProjection(Matrix4x4 view, Matrix4x4 projection);
     void SetRenderBlendMode(BlendMode blendMode);

@@ -25,7 +25,8 @@ public partial interface IRenderContext
     void Init(IRenderingApi renderingApi, IWindowingApi windowingApi);
 
     void SetBlendMode(BlendMode mode);
-    void SetShader(IShaderProgram shader);
+    void BindShader(IShaderProgram shader);
+    void BindShader(IShaderProgram shader, Action<IShaderProgram> setup);
     void ClearShader();
     void DrawSurface(Surface surface, Color color);
     

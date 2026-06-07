@@ -11,6 +11,7 @@ public partial class RenderContext : IRenderContext
     private IRenderingApi _renderingApi = null!;
     private IWindowingApi _windowingApi = null!;
     private IShaderProgram? _shaderProgram;
+    private Action<IShaderProgram>? _shaderSetup;
     
     public void Init(IRenderingApi renderingApi, IWindowingApi windowingApi)
     {
@@ -26,7 +27,16 @@ public partial class RenderContext : IRenderContext
     {
         _renderingApi.SetRenderBlendMode(mode);
     }
-    public void SetShader(IShaderProgram shader) {
+
+    public void BindShader(IShaderProgram shader, Action<IShaderProgram> setup)
+    {
+        _shaderProgram?.Stop();
+        _shaderProgram = shader;
+        _shaderSetup = setup;
+        _shaderProgram.Use();
+    }
+    
+    public void BindShader(IShaderProgram shader) {
         _shaderProgram?.Stop();
         _shaderProgram = shader;
         _shaderProgram.Use();
@@ -36,6 +46,7 @@ public partial class RenderContext : IRenderContext
     {
         _shaderProgram?.Stop();
         _shaderProgram = null;
+        _shaderSetup = null;
     }
 
     public void BindSurface(Surface surface)

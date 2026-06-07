@@ -54,6 +54,11 @@ public sealed class HeadlessRenderingApi : IRenderingApi
     {
     }
 
+    public void EnsureBatch(PrimitiveTopology topology, ShaderSetup shaderSetup, uint? texture)
+    {
+        
+    }
+
     public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture)
     {
     }
@@ -94,6 +99,11 @@ public sealed class HeadlessRenderingApi : IRenderingApi
         
     }
 
+    public void ShaderSetup(Action<IShaderProgram> setup)
+    {
+        
+    }
+
     public IShaderProgram CreateShaderProgram(string source)
     {
         return new ShaderProgram();
@@ -114,6 +124,11 @@ public sealed class HeadlessRenderingApi : IRenderingApi
 
     public void SetScissorRect(Rect2i rect)
     {
+    }
+
+    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode, Action<IShaderProgram> setupShader)
+    {
+        
     }
 
     public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha)

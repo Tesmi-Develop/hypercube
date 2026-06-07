@@ -102,7 +102,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
         
         return new TextureHandle(handle);
     }
-
+    
     public override void DeleteTexture(TextureHandle handle)
     {
         if (!handle.HasValue)
@@ -316,7 +316,7 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
     private void Render(Batch batch, IWindow window)
     {
         var renderState = GetRenderState(batch.RenderStateId);
-        var shader = batch.Shader;
+        var shaderSetup = batch.ShaderSetup;
 
         if (renderState.Surface.HasValue)
         {
@@ -333,17 +333,15 @@ public sealed partial class OpenGlRenderingApi : BaseRenderingApi, IOpenGlRender
             Gl.BindTexture(TextureTarget.Texture2D, batch.TextureHandle.Value);
         }
         
-        if (shader is null)
-            throw new Exception();
-        
-        shader.Use();
-        shader.SetUniform("model", Matrix4x4.Identity, transpose: true);
-        shader.SetUniform("view", renderState.View, transpose: true);
-        shader.SetUniform("projection", renderState.Projection, transpose: true);
+        shaderSetup.ShaderProgram.Use();
+        shaderSetup.Setup?.Invoke(shaderSetup.ShaderProgram);
+        shaderSetup.ShaderProgram.SetUniform("model", Matrix4x4.Identity, transpose: true);
+        shaderSetup.ShaderProgram.SetUniform("view", renderState.View, transpose: true);
+        shaderSetup.ShaderProgram.SetUniform("projection", renderState.Projection, transpose: true);
 
         Gl.DrawElements(batch.PrimitiveTopology, batch.Size, DrawElementsType.UnsignedInt, batch.Start * sizeof(uint));
 
-        shader.Stop();
+        shaderSetup.ShaderProgram.Stop();
         
         Gl.BindTexture(TextureTarget.Texture2D, 0);
         Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

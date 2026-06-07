@@ -75,25 +75,25 @@ public abstract partial class BaseRenderingApi : IRenderingApi
 
     public abstract void Render(IWindow window);
 
-    public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture)
+    public void EnsureBatch(PrimitiveTopology topology, ShaderSetup shaderSetup, uint? texture)
     {
-        EnsureBatch(topology, shader, texture, _currentRenderStateId);
+        EnsureBatch(topology, shaderSetup, texture, _currentRenderStateId);
     }
     
-    public void EnsureBatch(PrimitiveTopology topology, IShaderProgram shader, uint? texture, RenderStateId renderStateId)
+    public void EnsureBatch(PrimitiveTopology topology, ShaderSetup shaderSetup, uint? texture, RenderStateId renderStateId)
     {
         if (_currentBatchData is not null)
         {
             // It's just similar batch,
             // we need changing nothing to render different things
-            if (_currentBatchData.Value.Equals(topology, texture, shader, renderStateId))
+            if (_currentBatchData.Value.Equals(topology, texture, shaderSetup, renderStateId))
                 return;
 
             // Creating a real batch
             GenerateBatch();
         }
         
-        _currentBatchData = new BatchData(BatchIndicesIndex, texture, shader, topology, renderStateId);
+        _currentBatchData = new BatchData(BatchIndicesIndex, texture, shaderSetup, topology, renderStateId);
     }
 
     public void BreakCurrentBatch()
@@ -121,6 +121,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     {
         PushIndex((uint) start, (uint) index);
     }
+
 
     public IShaderProgram CreateShaderProgram(string source)
     {
@@ -173,7 +174,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
             data.Start,
             currentIndex - data.Start,
             data.Texture,
-            data.Shader,
+            data.ShaderSetup,
             data.PrimitiveTopology,
             Matrix4x4.Identity,
             WindowingApi.Context,
@@ -190,7 +191,7 @@ public abstract partial class BaseRenderingApi : IRenderingApi
         return id;
     }
     
-    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode = BlendMode.Alpha)
+    public void SetRenderState(Matrix4x4 view, Matrix4x4 projection, Surface? surface, BlendMode blendMode)
     {
         var newState = new RenderState(view, projection, blendMode, surface);
         
@@ -223,6 +224,12 @@ public abstract partial class BaseRenderingApi : IRenderingApi
     public RenderState GetCurrentRenderState()
     {
         return _renderStates[_currentRenderStateId.Value];
+    }
+    
+    public void ShaderSetup(Action<IShaderProgram> setup)
+    {
+        var currentState = GetCurrentRenderState();
+        SetRenderState(currentState.View, currentState.Projection, currentState.Surface, currentState.BlendMode);
     }
     
     public void SetRenderView(Matrix4x4 view)

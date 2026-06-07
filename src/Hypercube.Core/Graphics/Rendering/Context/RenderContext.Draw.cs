@@ -19,7 +19,7 @@ public sealed partial class RenderContext
         if (texture is not null && texture.Gpu is null)
             texture.GpuBind(_renderingApi);
         
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, shader, texture?.Gpu?.Handle);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, texture?.Gpu?.Handle);
 
         var start = _renderingApi.BatchVerticesIndex;
         var matrix = Matrix4x4.CreateTransformSRT(position, rotation, scale);
@@ -85,8 +85,9 @@ public sealed partial class RenderContext
             Quaternion.FromEulerZ((float) rotation),
             (Vector3) scale
         );
-        
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.TexturingShaderProgram, texture.Gpu?.Handle);
+
+        var shader = _shaderProgram ?? _renderingApi.TexturingShaderProgram;
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, texture.Gpu?.Handle);
         AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, rect * matrix, uv, color);
     }
     
@@ -111,7 +112,8 @@ public sealed partial class RenderContext
             Vector3.One
         );
         
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.TexturingShaderProgram, surface.FboTextureHandle);
+        var shader = _shaderProgram ?? _renderingApi.TexturingShaderProgram;
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, surface.FboTextureHandle);
         AddQuadTriangleBatch(_renderingApi.BatchVerticesIndex, rect, Rect2.UV, color);
     }
     
@@ -121,7 +123,7 @@ public sealed partial class RenderContext
             throw new Exception();
 
         var shader = _shaderProgram ?? _renderingApi.PrimitiveShaderProgram;
-        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, shader, null);
+        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, null);
         
         if (outline)
         {
@@ -140,7 +142,8 @@ public sealed partial class RenderContext
         var direction = (end - start).Normalized;
         var normal = new Vector2(-direction.Y, direction.X) * thickness / 2f;
 
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.PrimitiveShaderProgram, null);
+        var shader = _shaderProgram ?? _renderingApi.PrimitiveShaderProgram;
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, null);
 
         var startIndex = _renderingApi.BatchVerticesIndex;
         
@@ -162,7 +165,8 @@ public sealed partial class RenderContext
         if (_renderingApi.PrimitiveShaderProgram is null)
             throw new InvalidOperationException("Primitive shader program is not initialized");
         
-        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, _shaderProgram ?? _renderingApi.PrimitiveShaderProgram, null);
+        var shader = _shaderProgram ?? _renderingApi.PrimitiveShaderProgram;
+        _renderingApi.EnsureBatch(outline ? PrimitiveTopology.LineList : PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = shader, Setup = _shaderSetup }, null);
         
         var startIndex = _renderingApi.BatchVerticesIndex;
         

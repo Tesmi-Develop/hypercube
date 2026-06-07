@@ -104,7 +104,7 @@ public sealed class SpriteSystem : PatchEntitySystem
             var scale = transform.LocalScale * sprite.Scale;
 
             if (sprite.Shader is not null)
-                renderer.SetShader(sprite.Shader);
+                renderer.BindShader(sprite.Shader);
             
             renderer.DrawTexture(sprite.Texture, position.Xy, rotation, scale.Xy, sprite.Color, sprite.Uv);
             renderer.ClearShader();

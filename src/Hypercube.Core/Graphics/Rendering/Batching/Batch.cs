@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Hypercube.Core.Graphics.Rendering.Api;
 using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Mathematics.Matrices;
 using WindowHandle = Hypercube.Core.Windowing.Windows.WindowHandle;
@@ -11,18 +12,18 @@ public readonly struct Batch : IEquatable<Batch>
     public readonly int Start;
     public readonly int Size;
     public readonly uint? TextureHandle;
-    public readonly IShaderProgram Shader;
+    public readonly ShaderSetup ShaderSetup;
     public readonly PrimitiveTopology PrimitiveTopology;
     public readonly Matrix4x4 Model;
     public readonly WindowHandle Window;
     public readonly RenderStateId RenderStateId;
 
-    public Batch(int start, int size, uint? textureHandle, IShaderProgram shader, PrimitiveTopology primitiveTopology, Matrix4x4 model, WindowHandle window, RenderStateId renderStateId)
+    public Batch(int start, int size, uint? textureHandle, ShaderSetup shaderSetup, PrimitiveTopology primitiveTopology, Matrix4x4 model, WindowHandle window, RenderStateId renderStateId)
     {
         Start = start;
         Size = size;
         TextureHandle = textureHandle;
-        Shader = shader;
+        ShaderSetup = shaderSetup;
         PrimitiveTopology = primitiveTopology;
         Model = model;
         Window = window;

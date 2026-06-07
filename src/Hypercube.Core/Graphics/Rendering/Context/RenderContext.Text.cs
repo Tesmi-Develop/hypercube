@@ -1,4 +1,5 @@
-﻿using Hypercube.Core.Graphics.Rendering.Batching;
+﻿using Hypercube.Core.Graphics.Rendering.Api;
+using Hypercube.Core.Graphics.Rendering.Batching;
 using Hypercube.Core.Graphics.Resources;
 using Hypercube.Mathematics;
 using Hypercube.Mathematics.Shapes;
@@ -27,7 +28,7 @@ public partial class RenderContext
         );
 
         // Using a texture shader and font as a texture
-        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, _renderingApi.TexturingShaderProgram, font.Texture.Gpu?.Handle);
+        _renderingApi.EnsureBatch(PrimitiveTopology.TriangleList, new ShaderSetup { ShaderProgram = _renderingApi.TexturingShaderProgram }, font.Texture.Gpu?.Handle);
 
         foreach (var c in text)
         {

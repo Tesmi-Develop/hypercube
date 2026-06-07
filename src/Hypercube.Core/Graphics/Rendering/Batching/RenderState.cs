@@ -1,4 +1,5 @@
 ﻿using Hypercube.Core.Graphics.Rendering.Api;
+using Hypercube.Core.Graphics.Rendering.Shaders;
 using Hypercube.Mathematics.Matrices;
 
 namespace Hypercube.Core.Graphics.Rendering.Batching;
